@@ -1,6 +1,6 @@
 {
   "name": "cryptokit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Communicate between nodejs crypto and Swift Cryptokit",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,6 +9,9 @@
     "url": "git+https://github.com/fuzzcard/nodejs-cryptokit.git"
   },
   "homepage": "https://github.com/fuzzcard/nodejs-cryptokit#readme",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "scripts": {
     "test": "jest --config jest.config.json",
     "build": "tsc",
