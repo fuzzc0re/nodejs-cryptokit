@@ -17,10 +17,7 @@ const publicKeyPath = join(folderpath, "public.key");
 
 describe("P256 keys", () => {
   test("P256 key generation", () => {
-    expect(generateP256Keys(folderpath)).toStrictEqual({
-      privateKeyPath,
-      publicKeyPath,
-    });
+    expect(generateP256Keys(folderpath).privateKeyPath).toStrictEqual(privateKeyPath);
   });
 
   test("P256 private key loading", () => {

@@ -17,10 +17,7 @@ const publicKeyPath = join(folderpath, "public.key");
 
 describe("Ed25519 keys", () => {
   test("Ed25519 key generation", () => {
-    expect(generateEd25519Keys(folderpath)).toStrictEqual({
-      privateKeyPath,
-      publicKeyPath,
-    });
+    expect(generateEd25519Keys(folderpath).privateKeyPath).toStrictEqual(privateKeyPath);
   });
 
   test("Ed25519 private key loading", () => {

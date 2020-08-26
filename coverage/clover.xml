@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1598460995664" clover="3.2.0">
-  <project timestamp="1598460995664" name="All files">
-    <metrics statements="236" coveredstatements="216" conditionals="55" coveredconditionals="27" methods="21" coveredmethods="21" elements="312" coveredelements="264" complexity="0" loc="236" ncloc="236" packages="3" files="7" classes="7"/>
+<coverage generated="1598465144604" clover="3.2.0">
+  <project timestamp="1598465144605" name="All files">
+    <metrics statements="233" coveredstatements="213" conditionals="55" coveredconditionals="27" methods="21" coveredmethods="21" elements="309" coveredelements="261" complexity="0" loc="233" ncloc="233" packages="3" files="7" classes="7"/>
     <package name="src">
       <metrics statements="83" coveredstatements="74" conditionals="24" coveredconditionals="16" methods="6" coveredmethods="6"/>
       <file name="index.ts" path="/Users/fuzzcore/Desktop/fuzznets/fuzzcard/npm-packages/nodejs-cryptokit/src/index.ts">
@@ -92,9 +92,9 @@
       </file>
     </package>
     <package name="src.utils">
-      <metrics statements="112" coveredstatements="112" conditionals="6" coveredconditionals="3" methods="9" coveredmethods="9"/>
+      <metrics statements="109" coveredstatements="109" conditionals="6" coveredconditionals="3" methods="9" coveredmethods="9"/>
       <file name="Ed25519.ts" path="/Users/fuzzcore/Desktop/fuzznets/fuzzcard/npm-packages/nodejs-cryptokit/src/utils/Ed25519.ts">
-        <metrics statements="42" coveredstatements="42" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
+        <metrics statements="41" coveredstatements="41" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
         <line num="1" count="4" type="stmt"/>
         <line num="2" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
@@ -116,10 +116,10 @@
         <line num="47" count="1" type="stmt"/>
         <line num="48" count="1" type="stmt"/>
         <line num="49" count="1" type="stmt"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="52" count="1" type="stmt"/>
-        <line num="55" count="4" type="stmt"/>
-        <line num="56" count="2" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="54" count="4" type="stmt"/>
+        <line num="55" count="2" type="stmt"/>
+        <line num="59" count="2" type="stmt"/>
         <line num="60" count="2" type="stmt"/>
         <line num="61" count="2" type="stmt"/>
         <line num="62" count="2" type="stmt"/>
@@ -128,18 +128,17 @@
         <line num="65" count="2" type="stmt"/>
         <line num="66" count="2" type="stmt"/>
         <line num="67" count="2" type="stmt"/>
-        <line num="68" count="2" type="stmt"/>
-        <line num="70" count="2" type="stmt"/>
-        <line num="73" count="4" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="72" count="4" type="stmt"/>
+        <line num="73" count="2" type="stmt"/>
         <line num="74" count="2" type="stmt"/>
-        <line num="75" count="2" type="stmt"/>
-        <line num="77" count="2" type="stmt"/>
+        <line num="76" count="2" type="stmt"/>
+        <line num="80" count="4" type="stmt"/>
         <line num="81" count="4" type="stmt"/>
         <line num="82" count="4" type="stmt"/>
-        <line num="83" count="4" type="stmt"/>
       </file>
       <file name="P256.ts" path="/Users/fuzzcore/Desktop/fuzznets/fuzzcard/npm-packages/nodejs-cryptokit/src/utils/P256.ts">
-        <metrics statements="27" coveredstatements="27" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
+        <metrics statements="26" coveredstatements="26" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
         <line num="1" count="4" type="stmt"/>
         <line num="2" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
@@ -154,22 +153,21 @@
         <line num="30" count="1" type="stmt"/>
         <line num="31" count="1" type="stmt"/>
         <line num="32" count="1" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="38" count="4" type="stmt"/>
+        <line num="34" count="1" type="stmt"/>
+        <line num="37" count="4" type="stmt"/>
+        <line num="38" count="3" type="stmt"/>
         <line num="39" count="3" type="stmt"/>
-        <line num="40" count="3" type="stmt"/>
-        <line num="47" count="3" type="stmt"/>
-        <line num="50" count="4" type="stmt"/>
+        <line num="46" count="3" type="stmt"/>
+        <line num="49" count="4" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
         <line num="51" count="2" type="stmt"/>
-        <line num="52" count="2" type="stmt"/>
-        <line num="54" count="2" type="stmt"/>
-        <line num="58" count="4" type="stmt"/>
+        <line num="53" count="2" type="stmt"/>
+        <line num="57" count="4" type="stmt"/>
+        <line num="85" count="4" type="stmt"/>
         <line num="86" count="4" type="stmt"/>
-        <line num="87" count="4" type="stmt"/>
       </file>
       <file name="X25519.ts" path="/Users/fuzzcore/Desktop/fuzznets/fuzzcard/npm-packages/nodejs-cryptokit/src/utils/X25519.ts">
-        <metrics statements="43" coveredstatements="43" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
+        <metrics statements="42" coveredstatements="42" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
         <line num="1" count="4" type="stmt"/>
         <line num="2" count="4" type="stmt"/>
         <line num="3" count="4" type="stmt"/>
@@ -192,10 +190,10 @@
         <line num="32" count="1" type="stmt"/>
         <line num="33" count="1" type="stmt"/>
         <line num="34" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
-        <line num="40" count="4" type="stmt"/>
-        <line num="41" count="3" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="39" count="4" type="stmt"/>
+        <line num="40" count="3" type="stmt"/>
+        <line num="44" count="3" type="stmt"/>
         <line num="45" count="3" type="stmt"/>
         <line num="46" count="3" type="stmt"/>
         <line num="47" count="3" type="stmt"/>
@@ -204,15 +202,14 @@
         <line num="50" count="3" type="stmt"/>
         <line num="51" count="3" type="stmt"/>
         <line num="52" count="3" type="stmt"/>
-        <line num="53" count="3" type="stmt"/>
-        <line num="57" count="3" type="stmt"/>
-        <line num="60" count="4" type="stmt"/>
+        <line num="56" count="3" type="stmt"/>
+        <line num="59" count="4" type="stmt"/>
+        <line num="60" count="1" type="stmt"/>
         <line num="61" count="1" type="stmt"/>
-        <line num="62" count="1" type="stmt"/>
-        <line num="64" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="67" count="4" type="stmt"/>
         <line num="68" count="4" type="stmt"/>
         <line num="69" count="4" type="stmt"/>
-        <line num="70" count="4" type="stmt"/>
       </file>
     </package>
     <package name="src.utils.funcs">
