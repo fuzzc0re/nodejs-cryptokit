@@ -67,13 +67,13 @@ export function formatiOSPublicKey(publicKey: string | Buffer, publicKeyType: "P
 
   const publicKeyWithASN = publicKeyData.toString("base64");
 
-  var resultString = "-----BEGIN PUBLIC KEY-----\n";
-  var charCount = 0;
-  var currentLine = "";
-  for (var i = 0; i < publicKeyWithASN.length; i++) {
+  let resultString = "-----BEGIN PUBLIC KEY-----\n";
+  let charCount = 0;
+  let currentLine = "";
+  for (const i of publicKeyWithASN) {
     charCount += 1;
-    currentLine += publicKeyWithASN[i];
-    if (charCount == 64) {
+    currentLine += i;
+    if (charCount === 64) {
       resultString += currentLine + "\n";
       charCount = 0;
       currentLine = "";
@@ -134,7 +134,7 @@ export function encryptWithSymmetricKey(
 
   const iv = randomBytes(ivLength);
   const cipher = createCipheriv("chacha20-poly1305", symmetricKey.key, iv, {
-    authTagLength: authTagLength,
+    authTagLength,
   });
   const encryptedBuffer = Buffer.concat([cipher.update(message, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
@@ -163,7 +163,7 @@ export function decryptWithSymmetricKey(
   const encryptedText = encryptedMessageData.slice(ivLength, encryptedMessageDataLength - authTagLength);
   const tag = encryptedMessageData.slice(encryptedMessageDataLength - authTagLength, encryptedMessageDataLength);
   const decipher = createDecipheriv("chacha20-poly1305", symmetricKey.key, iv, {
-    authTagLength: authTagLength,
+    authTagLength,
   });
   decipher.setAuthTag(tag);
   const decrypted = decipher.update(encryptedText, "binary", "utf8") + decipher.final("utf8");

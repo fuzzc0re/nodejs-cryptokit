@@ -29,10 +29,9 @@ export function generateP256Keys(folderpath: string) {
 
   writeFileSync(privateKeyPath, p256Keys.privateKey);
   writeFileSync(publicKeyPath, p256Keys.publicKey);
-  const hexdump = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
-  console.log(hexdump);
+  const asn1parse = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
 
-  return { privateKeyPath, publicKeyPath };
+  return { privateKeyPath, publicKeyPath, asn1parse };
 }
 
 export function loadP256PrivateKeyObject(filepath: string) {

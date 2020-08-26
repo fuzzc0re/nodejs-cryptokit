@@ -46,10 +46,9 @@ export function generateEd25519Keys(folderpath: string) {
 
   writeFileSync(privateKeyPath, iv + ":" + privateKeyBufferFinal.toString("base64"));
   writeFileSync(publicKeyPath, ed25519Keys.publicKey);
-  const hexdump = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
-  console.log(hexdump);
+  const asn1parse = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
 
-  return { privateKeyPath, publicKeyPath };
+  return { privateKeyPath, publicKeyPath, asn1parse };
 }
 
 export function loadEd25519PrivateKeyObject(filepath: string) {

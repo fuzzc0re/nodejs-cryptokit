@@ -30,9 +30,13 @@ const P256FolderPath = join(__dirname, "keys", "P256");
 const P256KeyPaths = generateP256Keys(P256FolderPath);
 console.log("P256 private key path = " + P256KeyPaths.privateKeyPath);
 console.log("P256 public key path = " + P256KeyPaths.publicKeyPath);
+console.log("P256 public key asn1parse stdout = " + P256KeyPaths.asn1parse);
 ```
 
 There are equivalent helper functions for Ed25519 and X25519 keys.
+
+The asn1parse stdout contains the hexdump of the public keys. You need to copy the buffer and paste it into a swift Data([]) object with "0x" prefix on every element and commas.
+For the P256 keys you need to remove the first two elements of the dump ("0x00" and the second). For the other two keys you just need to remove the first element ("0x00").
 
 ## Loading keys
 
@@ -112,9 +116,6 @@ const decrypted = decryptWithSymmetricKey(
 ```
 
 You can see a full example, as well as a SwiftUI view to test the implementation in Swift.
-
-When you generate the keys in nodejs you will see the hexdump of the public keys. You need to copy the buffer and paste it into a swift Data([]) object with "0x" prefix on every element and commas.
-For the P256 keys you need to remove the first two elements of the dump ("0x00" and the second). For the other two keys you just need to remove the first element ("0x00").
 
 ## Licence
 
