@@ -211,9 +211,9 @@ export const X25519 = {
 };
 
 const cryptokit = {
-  P256: P256,
-  Ed25519: Ed25519,
-  X25519: X25519,
+  P256,
+  Ed25519,
+  X25519,
 };
 
 export default cryptokit;
