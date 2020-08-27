@@ -3,32 +3,32 @@ const { config } = require("dotenv");
 
 config({ path: join(__dirname, ".env") });
 
-const { utils, signMessage, verifySignature } = require("../lib/index");
+const cryptokit = require("../lib/index");
 
 const { iOSP256PublicKeyObject, iOSEd25519PublicKeyObject } = require("./keys/iOS");
 
-// const P256Filepaths = utils.generateP256Keys(P256FolderPath);
-// const Ed25519Filepaths = utils.generateEd25519Keys(Ed25519FolderPath);
+// const P256Filepaths = cryptokit.P256.generateKeys(P256FolderPath);
+// const Ed25519Filepaths = cryptokit.Ed25519.generateKeys(Ed25519FolderPath);
 
 const P256FolderPath = join(__dirname, "keys", "P256");
 const P256Filepaths = {
   privateKeyPath: join(P256FolderPath, "private.key"),
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
-const P256PrivateKeyObject = utils.loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
-const P256PublicKeyObject = utils.loadP256PublicKeyObject(P256Filepaths.publicKeyPath);
+const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
+const P256PublicKeyObject = cryptokit.P256.loadPublicKey(P256Filepaths.publicKeyPath);
 
 const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
 const Ed25519Filepaths = {
   privateKeyPath: join(Ed25519FolderPath, "private.key"),
   publicKeyPath: join(Ed25519FolderPath, "public.key"),
 };
-const Ed25519PrivateKeyObject = utils.loadEd25519PrivateKeyObject(Ed25519Filepaths.privateKeyPath);
-const Ed25519PublicKeyObject = utils.loadEd25519PublicKeyObject(Ed25519Filepaths.publicKeyPath);
+const Ed25519PrivateKeyObject = cryptokit.Ed25519.loadPrivateKey(Ed25519Filepaths.privateKeyPath);
+const Ed25519PublicKeyObject = cryptokit.Ed25519.loadPublicKey(Ed25519Filepaths.publicKeyPath);
 
 const messageToSignWithP256 = "Example message signed with P256 by nodejs";
-const messageP256Signature = signMessage(messageToSignWithP256, P256PrivateKeyObject);
-const messageP256SignatureVerification = verifySignature(
+const messageP256Signature = cryptokit.P256.sign(messageToSignWithP256, P256PrivateKeyObject);
+const messageP256SignatureVerification = cryptokit.P256.verify(
   messageToSignWithP256,
   messageP256Signature,
   P256PublicKeyObject
@@ -42,8 +42,8 @@ console.log(
 );
 
 const messageToSignWithEd25519 = "Example message signed with Ed25519 by nodejs";
-const messageEd25519Signature = signMessage(messageToSignWithEd25519, Ed25519PrivateKeyObject);
-const messageEd25519SignatureVerification = verifySignature(
+const messageEd25519Signature = cryptokit.Ed25519.sign(messageToSignWithEd25519, Ed25519PrivateKeyObject);
+const messageEd25519SignatureVerification = cryptokit.Ed25519.verify(
   messageToSignWithEd25519,
   messageEd25519Signature,
   Ed25519PublicKeyObject
@@ -60,20 +60,20 @@ console.log(
 const iOSP256SignedMessage = "Message to sign with P256 iOS";
 const iOSP256MessageSignature =
   "MEUCIQDly41gOjZVYIMpsRoFUU7CfhXRFpLWjB4qRz86bR766gIgA+SmTXw3gE5lWgvA+LY9p7mqUaMmb6ACx4SWAY5tkuo=";
-const verification_iOS_P256_Signature = verifySignature(
+const verificationiOSP256Signature = cryptokit.P256.verify(
   iOSP256SignedMessage,
   iOSP256MessageSignature,
   iOSP256PublicKeyObject
 );
-console.log("iOS P256 signature verification was: " + verification_iOS_P256_Signature + "\n");
+console.log("iOS P256 signature verification was: " + verificationiOSP256Signature + "\n");
 
 // Test Ed25519 iOS
 const iOSEd25519SignedMessage = "Message to sign with Ed25519 iOS";
 const iOSEd25519MessageSignature =
   "P/vjunKl+bmBYiDKbf1KX6BKKH5k6neRVt2nvtAHet2eUg/k6L7+xZvLf+5Fu7FlfFjCy2BEhLKCW184CLuyAQ==";
-const verification_iOS_Ed25519_Signature = verifySignature(
+const verificationiOSEd25519Signature = cryptokit.Ed25519.verify(
   iOSEd25519SignedMessage,
   iOSEd25519MessageSignature,
   iOSEd25519PublicKeyObject
 );
-console.log("iOS Ed25519 verification was: " + verification_iOS_Ed25519_Signature + "\n");
+console.log("iOS Ed25519 verification was: " + verificationiOSEd25519Signature + "\n");

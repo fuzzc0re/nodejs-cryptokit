@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, rmdirSync } from "fs";
 import { KeyObject } from "crypto";
 import { config } from "dotenv";
 
-import { utils } from "../../index";
+import cryptokit from "../../index";
 
 config({ path: join(__dirname, "..", ".env") });
 
@@ -17,15 +17,15 @@ const publicKeyPath = join(folderpath, "public.key");
 
 describe("X25519 keys", () => {
   test("X25519 key generation", () => {
-    expect(utils.generateX25519Keys(folderpath).privateKeyPath).toStrictEqual(privateKeyPath);
+    expect(cryptokit.X25519.generateKeys(folderpath).privateKeyPath).toStrictEqual(privateKeyPath);
   });
 
   test("X25519 private key loading", () => {
-    expect(utils.loadX25519PrivateKeyObject(privateKeyPath)).toEqual(expect.any(KeyObject));
+    expect(cryptokit.X25519.loadPrivateKey(privateKeyPath)).toEqual(expect.any(KeyObject));
   });
 
   test("X25519 public key loading", () => {
-    expect(utils.loadX25519PublicKeyObject(publicKeyPath)).toEqual(expect.any(KeyObject));
+    expect(cryptokit.X25519.loadPublicKey(publicKeyPath)).toEqual(expect.any(KeyObject));
   });
 });
 

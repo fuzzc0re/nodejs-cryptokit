@@ -21,19 +21,7 @@ import { dh } from "./utils/funcs/diffieHellman";
 //   throw new Error("No passwords provided in .env file");
 // }
 
-export const utils = {
-  generateP256Keys,
-  loadP256PrivateKeyObject,
-  loadP256PublicKeyObject,
-  generateEd25519Keys,
-  loadEd25519PrivateKeyObject,
-  loadEd25519PublicKeyObject,
-  generateX25519Keys,
-  loadX25519PrivateKeyObject,
-  loadX25519PublicKeyObject,
-};
-
-export function signMessage(message: string | Buffer, privateKey: KeyObject) {
+function signMessage(message: string | Buffer, privateKey: KeyObject) {
   let messageData: Buffer;
   if (typeof message === "string") {
     messageData = Buffer.from(message, "utf8");
@@ -50,7 +38,7 @@ export function signMessage(message: string | Buffer, privateKey: KeyObject) {
   }
 }
 
-export function verifySignature(message: string | Buffer, signature: string | Buffer, publicKey: KeyObject) {
+function verifySignature(message: string | Buffer, signature: string | Buffer, publicKey: KeyObject) {
   let messageData: Buffer;
   if (typeof message === "string") {
     messageData = Buffer.from(message, "utf8");
@@ -70,7 +58,7 @@ export function verifySignature(message: string | Buffer, signature: string | Bu
   return verification;
 }
 
-export function formatiOSPublicKey(publicKey: string | Buffer, publicKeyType: "P256" | "Ed25519" | "X25519") {
+function formatiOSPublicKey(publicKey: string | Buffer, publicKeyType: "P256" | "Ed25519" | "X25519") {
   let publicKeyBuffer: Buffer;
   if (typeof publicKey === "string") {
     publicKeyBuffer = Buffer.from(publicKey, "base64");
@@ -147,7 +135,7 @@ function generateSymmetricKey(
 const ivLength = 12;
 const authTagLength = 16;
 
-export function encryptWithSymmetricKey(
+function encryptWithSymmetricKey(
   message: string,
   privateKey: KeyObject,
   publicKey: KeyObject
@@ -165,7 +153,7 @@ export function encryptWithSymmetricKey(
   return { message: encryptedMessage.toString("base64"), symmetricKeySalt: symmetricKey.salt.toString("base64") };
 }
 
-export function decryptWithSymmetricKey(
+function decryptWithSymmetricKey(
   encryptedMessage: string | Buffer,
   privateKey: KeyObject,
   publicKey: KeyObject,
@@ -192,3 +180,40 @@ export function decryptWithSymmetricKey(
 
   return decrypted;
 }
+
+export const P256 = {
+  generateKeys: generateP256Keys,
+  loadPrivateKey: loadP256PrivateKeyObject,
+  loadPublicKey: loadP256PublicKeyObject,
+  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "P256"),
+  sign: signMessage,
+  verify: verifySignature,
+  encrypt: encryptWithSymmetricKey,
+  decrypt: decryptWithSymmetricKey,
+};
+
+export const Ed25519 = {
+  generateKeys: generateEd25519Keys,
+  loadPrivateKey: loadEd25519PrivateKeyObject,
+  loadPublicKey: loadEd25519PublicKeyObject,
+  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "Ed25519"),
+  sign: signMessage,
+  verify: verifySignature,
+};
+
+export const X25519 = {
+  generateKeys: generateX25519Keys,
+  loadPrivateKey: loadX25519PrivateKeyObject,
+  loadPublicKey: loadX25519PublicKeyObject,
+  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "X25519"),
+  encrypt: encryptWithSymmetricKey,
+  decrypt: decryptWithSymmetricKey,
+};
+
+const cryptokit = {
+  P256: P256,
+  Ed25519: Ed25519,
+  X25519: X25519,
+};
+
+export default cryptokit;

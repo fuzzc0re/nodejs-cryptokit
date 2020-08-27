@@ -1,16 +1,7 @@
 import { join } from "path";
 import { config } from "dotenv";
 
-import { verifySignature, decryptWithSymmetricKey } from "../index";
-
-import {
-  // generateP256Keys,
-  loadP256PrivateKeyObject,
-} from "../utils/P256";
-import {
-  // generateX25519Keys,
-  loadX25519PrivateKeyObject,
-} from "../utils/X25519";
+import cryptokit from "../index";
 
 import { iOSP256PublicKeyObject, iOSEd25519PublicKeyObject, iOSX25519PublicKeyObject } from "./keys/iOS.test";
 
@@ -25,21 +16,23 @@ const P256Filepaths = {
   privateKeyPath: join(P256FolderPath, "private.key"),
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
-const P256PrivateKeyObject = loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
+const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
 
 const X25519FolderPath = join(__dirname, "keys", "X25519");
 const X25519Filepaths = {
   privateKeyPath: join(X25519FolderPath, "private.key"),
   publicKeyPath: join(X25519FolderPath, "public.key"),
 };
-const X25519PrivateKeyObject = loadX25519PrivateKeyObject(X25519Filepaths.privateKeyPath);
+const X25519PrivateKeyObject = cryptokit.X25519.loadPrivateKey(X25519Filepaths.privateKeyPath);
 
 describe("Swift Cryptokit test suite", () => {
   const iOSP256SignedMessage = "Message to sign with P256 iOS";
   const iOSP256MessageSignature =
     "MEUCIQDly41gOjZVYIMpsRoFUU7CfhXRFpLWjB4qRz86bR766gIgA+SmTXw3gE5lWgvA+LY9p7mqUaMmb6ACx4SWAY5tkuo=";
   test("Verify iOS P256 signature", () => {
-    expect(verifySignature(iOSP256SignedMessage, iOSP256MessageSignature, iOSP256PublicKeyObject)).toStrictEqual(true);
+    expect(cryptokit.P256.verify(iOSP256SignedMessage, iOSP256MessageSignature, iOSP256PublicKeyObject)).toStrictEqual(
+      true
+    );
   });
 
   test("Verify iOS Ed25519 signature", () => {
@@ -47,7 +40,7 @@ describe("Swift Cryptokit test suite", () => {
     const iOSEd25519MessageSignature =
       "P/vjunKl+bmBYiDKbf1KX6BKKH5k6neRVt2nvtAHet2eUg/k6L7+xZvLf+5Fu7FlfFjCy2BEhLKCW184CLuyAQ==";
     expect(
-      verifySignature(iOSEd25519SignedMessage, iOSEd25519MessageSignature, iOSEd25519PublicKeyObject)
+      cryptokit.Ed25519.verify(iOSEd25519SignedMessage, iOSEd25519MessageSignature, iOSEd25519PublicKeyObject)
     ).toStrictEqual(true);
   });
 
@@ -57,7 +50,7 @@ describe("Swift Cryptokit test suite", () => {
       "4LXIVazlAnPGCgheXgQK1N4neJfDChwTWKyV5ElyeMRmPAoWDtYoh1q2seeUNmd3xbavsLqGEPtPOxqPKMEOV5gu20tKOwNMX5sMGsZm1gStBBQkqNaktv52Iw==";
     const iOSP256SymmetricKeySalt = "Gfb/vwvj0Dmaxt5UqhZ6Gg==";
     expect(
-      decryptWithSymmetricKey(
+      cryptokit.P256.decrypt(
         iOSP256EncryptedMessage,
         P256PrivateKeyObject,
         iOSP256PublicKeyObject,
@@ -72,7 +65,7 @@ describe("Swift Cryptokit test suite", () => {
       "XfDimHc0LYyoZI/M3ogX81G0ndsFBV1BAONxoX1pX4Il5M6X0dMQvtiuxj4V4K0HQOBBNRK+m+5PhQG1rz7PYW2bNzT2FWHnrPDu4qrzt2gGSK4ShG5jiynCO9qR";
     const iOSX25519SymmetricKeySalt = "gfSsGl0yvkNQaJHXw/WLvw==";
     expect(
-      decryptWithSymmetricKey(
+      cryptokit.X25519.decrypt(
         iOSX25519EncryptedMessage,
         X25519PrivateKeyObject,
         iOSX25519PublicKeyObject,
