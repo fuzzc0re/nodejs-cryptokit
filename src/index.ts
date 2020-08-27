@@ -1,8 +1,18 @@
 import { randomBytes, createCipheriv, createDecipheriv, sign, verify, createPublicKey, KeyObject } from "crypto";
 
-import { P256ASNBuffer } from "./utils/P256";
-import { Ed25519ASNBuffer } from "./utils/Ed25519";
-import { X25519ASNBuffer } from "./utils/X25519";
+import { generateP256Keys, loadP256PrivateKeyObject, loadP256PublicKeyObject, P256ASNBuffer } from "./utils/P256";
+import {
+  generateEd25519Keys,
+  loadEd25519PrivateKeyObject,
+  loadEd25519PublicKeyObject,
+  Ed25519ASNBuffer,
+} from "./utils/Ed25519";
+import {
+  generateX25519Keys,
+  loadX25519PrivateKeyObject,
+  loadX25519PublicKeyObject,
+  X25519ASNBuffer,
+} from "./utils/X25519";
 
 import { hkdf } from "./utils/funcs/hkdf";
 import { dh } from "./utils/funcs/diffieHellman";
@@ -10,6 +20,18 @@ import { dh } from "./utils/funcs/diffieHellman";
 // if (!process.env.P256_PASS && !process.env.ED25519_PASS && !process.env.X25519_PASS) {
 //   throw new Error("No passwords provided in .env file");
 // }
+
+export const utils = {
+  generateP256Keys,
+  loadP256PrivateKeyObject,
+  loadP256PublicKeyObject,
+  generateEd25519Keys,
+  loadEd25519PrivateKeyObject,
+  loadEd25519PublicKeyObject,
+  generateX25519Keys,
+  loadX25519PrivateKeyObject,
+  loadX25519PublicKeyObject,
+};
 
 export function signMessage(message: string | Buffer, privateKey: KeyObject) {
   let messageData: Buffer;

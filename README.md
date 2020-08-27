@@ -24,10 +24,10 @@ To generate keys you can use the helper functions provided as follows:
 
 ```typescript
 import { join } from "path";
-import { generateP256Keys } from "cryptokit/utils";
+import { utils } from "cryptokit";
 
 const P256FolderPath = join(__dirname, "keys", "P256");
-const P256KeyPaths = generateP256Keys(P256FolderPath);
+const P256KeyPaths = utils.generateP256Keys(P256FolderPath);
 console.log("P256 private key path = " + P256KeyPaths.privateKeyPath);
 console.log("P256 public key path = " + P256KeyPaths.publicKeyPath);
 console.log("P256 public key asn1parse stdout = " + P256KeyPaths.asn1parse);
@@ -44,13 +44,13 @@ There are also helper functions to load private and public keys as nodejs KeyObj
 
 ```typescript
 import { join } from "path";
-import { loadP256PrivateKeyObject, loadP256PublicKeyObject } from "cryptokit/utils";
+import { utils } from "cryptokit/utils";
 
 const P256PrivateKeyPath = join(__dirname, "keys", "P256", "private.key");
 const P256PublicKeyPath = join(__dirname, "keys", "P256", "public.key");
 
-const P256PrivateKeyObject = loadP256PrivateKeyObject(P256PrivateKeyPath);
-const P256PublicKeyObject = loadP256PublicKeyObject(P256PublicKeyPath);
+const P256PrivateKeyObject = utils.loadP256PrivateKeyObject(P256PrivateKeyPath);
+const P256PublicKeyObject = utils.loadP256PublicKeyObject(P256PublicKeyPath);
 ```
 
 In order to load an iOS public key we have the helper method

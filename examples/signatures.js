@@ -3,39 +3,28 @@ const { config } = require("dotenv");
 
 config({ path: join(__dirname, ".env") });
 
-const { signMessage, verifySignature } = require("../lib/index");
-
-const {
-  //  generateP256Keys,
-  loadP256PrivateKeyObject,
-  loadP256PublicKeyObject,
-} = require("../lib/utils/P256");
-const {
-  // generateEd25519Keys,
-  loadEd25519PrivateKeyObject,
-  loadEd25519PublicKeyObject,
-} = require("../lib/utils/Ed25519");
+const { utils, signMessage, verifySignature } = require("../lib/index");
 
 const { iOSP256PublicKeyObject, iOSEd25519PublicKeyObject } = require("./keys/iOS");
 
-// const P256Filepaths = generateP256Keys(P256FolderPath);
-// const Ed25519Filepaths = generateEd25519Keys(Ed25519FolderPath);
+// const P256Filepaths = utils.generateP256Keys(P256FolderPath);
+// const Ed25519Filepaths = utils.generateEd25519Keys(Ed25519FolderPath);
 
 const P256FolderPath = join(__dirname, "keys", "P256");
 const P256Filepaths = {
   privateKeyPath: join(P256FolderPath, "private.key"),
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
-const P256PrivateKeyObject = loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
-const P256PublicKeyObject = loadP256PublicKeyObject(P256Filepaths.publicKeyPath);
+const P256PrivateKeyObject = utils.loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
+const P256PublicKeyObject = utils.loadP256PublicKeyObject(P256Filepaths.publicKeyPath);
 
 const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
 const Ed25519Filepaths = {
   privateKeyPath: join(Ed25519FolderPath, "private.key"),
   publicKeyPath: join(Ed25519FolderPath, "public.key"),
 };
-const Ed25519PrivateKeyObject = loadEd25519PrivateKeyObject(Ed25519Filepaths.privateKeyPath);
-const Ed25519PublicKeyObject = loadEd25519PublicKeyObject(Ed25519Filepaths.publicKeyPath);
+const Ed25519PrivateKeyObject = utils.loadEd25519PrivateKeyObject(Ed25519Filepaths.privateKeyPath);
+const Ed25519PublicKeyObject = utils.loadEd25519PublicKeyObject(Ed25519Filepaths.publicKeyPath);
 
 const messageToSignWithP256 = "Example message signed with P256 by nodejs";
 const messageP256Signature = signMessage(messageToSignWithP256, P256PrivateKeyObject);

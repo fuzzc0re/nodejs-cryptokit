@@ -1,6 +1,6 @@
 {
   "name": "cryptokit",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Communicate between nodejs crypto and Swift Cryptokit",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

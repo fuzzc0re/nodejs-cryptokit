@@ -3,36 +3,26 @@ const { config } = require("dotenv");
 
 config({ path: join(__dirname, ".env") });
 
-const { encryptWithSymmetricKey, decryptWithSymmetricKey } = require("../lib/index");
-
-const {
-  //  generateP256Keys,
-  loadP256PrivateKeyObject,
-} = require("../lib/utils/P256");
-
-const {
-  // generateX25519Keys,
-  loadX25519PrivateKeyObject,
-} = require("../lib/utils/X25519");
+const { utils, encryptWithSymmetricKey, decryptWithSymmetricKey } = require("../lib/index");
 
 const { iOSP256PublicKeyObject, iOSX25519PublicKeyObject } = require("./keys/iOS");
 
-// const P256Filepaths = generateP256Keys(P256FolderPath);
-// const X25519Filepaths = generateX25519Keys(X25519FolderPath);
+// const P256Filepaths = utils.generateP256Keys(P256FolderPath);
+// const X25519Filepaths = utils.generateX25519Keys(X25519FolderPath);
 
 const P256FolderPath = join(__dirname, "keys", "P256");
 const P256Filepaths = {
   privateKeyPath: join(P256FolderPath, "private.key"),
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
-const P256PrivateKeyObject = loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
+const P256PrivateKeyObject = utils.loadP256PrivateKeyObject(P256Filepaths.privateKeyPath);
 
 const X25519FolderPath = join(__dirname, "keys", "X25519");
 const X25519Filepaths = {
   privateKeyPath: join(X25519FolderPath, "private.key"),
   publicKeyPath: join(X25519FolderPath, "public.key"),
 };
-const X25519PrivateKeyObject = loadX25519PrivateKeyObject(X25519Filepaths.privateKeyPath);
+const X25519PrivateKeyObject = utils.loadX25519PrivateKeyObject(X25519Filepaths.privateKeyPath);
 
 // Test P256 iOS
 const messageToEncryptWithP256 = "Hi! I am an end-to-end encrypted example message from nodejs with symmetric P256 key";
