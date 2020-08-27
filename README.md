@@ -44,7 +44,7 @@ There are also helper functions to load private and public keys as nodejs KeyObj
 
 ```typescript
 import { join } from "path";
-import { utils } from "cryptokit/utils";
+import { utils } from "cryptokit";
 
 const P256PrivateKeyPath = join(__dirname, "keys", "P256", "private.key");
 const P256PublicKeyPath = join(__dirname, "keys", "P256", "public.key");
