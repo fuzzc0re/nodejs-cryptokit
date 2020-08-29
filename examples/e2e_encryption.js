@@ -23,6 +23,8 @@ const X25519Filepaths = {
   publicKeyPath: join(X25519FolderPath, "public.key"),
 };
 const X25519PrivateKeyObject = cryptokit.X25519.loadPrivateKey(X25519Filepaths.privateKeyPath);
+const X25519PublicKey = cryptokit.X25519.loadPublicKey(X25519Filepaths.publicKeyPath);
+console.log("X25519 iOS compatible public key = " + X25519PublicKey.raw + "\n");
 
 // Test P256 iOS
 const messageToEncryptWithP256 = "Hi! I am an end-to-end encrypted example message from nodejs with symmetric P256 key";

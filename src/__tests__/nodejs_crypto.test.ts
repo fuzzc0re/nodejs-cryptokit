@@ -18,7 +18,7 @@ const P256Filepaths = {
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
 const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
-const P256PublicKeyObject = cryptokit.P256.loadPublicKey(P256Filepaths.publicKeyPath);
+const P256PublicKey = cryptokit.P256.loadPublicKey(P256Filepaths.publicKeyPath);
 
 const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
 const Ed25519Filepaths = {
@@ -26,7 +26,7 @@ const Ed25519Filepaths = {
   publicKeyPath: join(Ed25519FolderPath, "public.key"),
 };
 const Ed25519PrivateKeyObject = cryptokit.Ed25519.loadPrivateKey(Ed25519Filepaths.privateKeyPath);
-const Ed25519PublicKeyObject = cryptokit.Ed25519.loadPublicKey(Ed25519Filepaths.publicKeyPath);
+const Ed25519PublicKey = cryptokit.Ed25519.loadPublicKey(Ed25519Filepaths.publicKeyPath);
 
 const X25519FolderPath = join(__dirname, "keys", "X25519");
 const X25519Filepaths = {
@@ -39,13 +39,13 @@ describe("Nodejs crypto test suite", () => {
   test("Sign and verify nodejs P256", () => {
     const messageToSignWithP256 = "Example message signed with P256 by nodejs";
     const messageP256Signature = cryptokit.P256.sign(messageToSignWithP256, P256PrivateKeyObject);
-    expect(cryptokit.P256.verify(messageToSignWithP256, messageP256Signature, P256PublicKeyObject)).toBe(true);
+    expect(cryptokit.P256.verify(messageToSignWithP256, messageP256Signature, P256PublicKey.object)).toBe(true);
   });
 
   test("Sign and verify nodejs Ed25519", () => {
     const messageToSignWithEd25519 = "Example message signed with Ed25519 by nodejs";
     const messageEd25519Signature = cryptokit.Ed25519.sign(messageToSignWithEd25519, Ed25519PrivateKeyObject);
-    expect(cryptokit.Ed25519.verify(messageToSignWithEd25519, messageEd25519Signature, Ed25519PublicKeyObject)).toBe(
+    expect(cryptokit.Ed25519.verify(messageToSignWithEd25519, messageEd25519Signature, Ed25519PublicKey.object)).toBe(
       true
     );
   });

@@ -30,13 +30,9 @@ const P256FolderPath = join(__dirname, "keys", "P256");
 const P256KeyPaths = cryptokit.P256.generateKeys(P256FolderPath);
 console.log("P256 private key path = " + P256KeyPaths.privateKeyPath);
 console.log("P256 public key path = " + P256KeyPaths.publicKeyPath);
-console.log("P256 public key asn1parse stdout = " + P256KeyPaths.asn1parse);
 ```
 
 There are equivalent functions for Ed25519 and X25519 keys.
-
-The asn1parse stdout contains the hexdump of the public keys. You need to copy the buffer and paste it into a swift Data([]) object with "0x" prefix on every element and commas.
-For the P256 keys you need to remove the first two elements of the dump ("0x00" and the second). For the other two keys you just need to remove the first element ("0x00").
 
 ## Loading keys
 
@@ -50,7 +46,9 @@ const P256PrivateKeyPath = join(__dirname, "keys", "P256", "private.key");
 const P256PublicKeyPath = join(__dirname, "keys", "P256", "public.key");
 
 const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256PrivateKeyPath);
-const P256PublicKeyObject = cryptokit.P256.loadPublicKey(P256PublicKeyPath);
+const P256PublicKey = cryptokit.P256.loadPublicKey(P256PublicKeyPath); // returns { object: KeyObject, raw: string }
+
+console.log(P256PublicKey.raw); // this is what you need to send to Swift Cryptokit
 ```
 
 In order to load an iOS public key we have the helper method
@@ -61,7 +59,7 @@ import cryptokit from "cryptokit";
 // exmple iOS P256 key
 const iOSP256PublicKey = "BDtr3giflhW7iplVoXZ2olz0lpsgyjChKsu22go+Nhm5TDk8dnwmMlm34uczZpjwd3x9NXO/oQWRuhEZF+95p3k=";
 
-const iOSP256PublicKeyObject = cryptokit.P256.formatiOSPublicKey(iOSP256PublicKey);
+const iOSP256PublicKeyObject = cryptokit.P256.formatiOSPublicKey(iOSP256PublicKey); // returns KeyObject
 ```
 
 ## Signing and verifying
@@ -82,7 +80,7 @@ In order to verify a signature we need the message and the public key
 ```typescript
 import cryptokit from "cryptokit";
 
-const verification = cryptokit.P256.verify(message, signature, P256PublicKeyObject);
+const verification = cryptokit.P256.verify(message, signature, P256PublicKey.object);
 ```
 
 ## Encryption and decryption

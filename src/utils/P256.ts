@@ -1,7 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { generateKeyPairSync, createPublicKey, createPrivateKey } from "crypto";
+import { generateKeyPairSync, createPublicKey, createPrivateKey, KeyObject } from "crypto";
 import { join } from "path";
-import { execSync } from "child_process";
 
 const algorithm = "aes-256-ctr";
 
@@ -29,9 +28,8 @@ export function generateP256Keys(folderpath: string) {
 
   writeFileSync(privateKeyPath, p256Keys.privateKey);
   writeFileSync(publicKeyPath, p256Keys.publicKey);
-  const asn1parse = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
 
-  return { privateKeyPath, publicKeyPath, asn1parse };
+  return { privateKeyPath, publicKeyPath };
 }
 
 export function loadP256PrivateKeyObject(filepath: string) {
@@ -44,13 +42,6 @@ export function loadP256PrivateKeyObject(filepath: string) {
   });
 
   return privateKeyObject;
-}
-
-export function loadP256PublicKeyObject(filepath: string) {
-  const content = readFileSync(filepath, "utf8");
-  const publicKeyObject = createPublicKey({ key: content });
-
-  return publicKeyObject;
 }
 
 // To convert iOS public keys to PEM
@@ -84,3 +75,13 @@ const P256OIDHeader = new Uint8Array([
 ]);
 const P256OIDHeaderLen = 26;
 export const P256ASNBuffer = Buffer.from(P256OIDHeader, P256OIDHeaderLen);
+
+export function loadP256PublicKey(filepath: string): { object: KeyObject; raw: string } {
+  const content = readFileSync(filepath, "utf8");
+  const publicKeyObject = createPublicKey({ key: content });
+
+  const rawWithHeader = publicKeyObject.export({ type: "spki", format: "der" });
+  const rawWithoutHeader = rawWithHeader.slice(P256OIDHeaderLen + 1);
+
+  return { object: publicKeyObject, raw: rawWithoutHeader.toString("base64") };
+}

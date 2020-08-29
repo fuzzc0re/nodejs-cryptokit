@@ -8,8 +8,8 @@ import {
   createDecipheriv,
   createPublicKey,
   createPrivateKey,
+  KeyObject,
 } from "crypto";
-import { execSync } from "child_process";
 
 const hash = "sha512";
 const algorithm = "aes-256-ctr";
@@ -46,9 +46,9 @@ export function generateEd25519Keys(folderpath: string) {
 
   writeFileSync(privateKeyPath, iv + ":" + privateKeyBufferFinal.toString("base64"));
   writeFileSync(publicKeyPath, ed25519Keys.publicKey);
-  const asn1parse = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
+  // const asn1parse = execSync("openssl asn1parse -in " + publicKeyPath + " -dump").toString();
 
-  return { privateKeyPath, publicKeyPath, asn1parse };
+  return { privateKeyPath, publicKeyPath };
 }
 
 export function loadEd25519PrivateKeyObject(filepath: string) {
@@ -69,14 +69,17 @@ export function loadEd25519PrivateKeyObject(filepath: string) {
   return privateKeyObject;
 }
 
-export function loadEd25519PublicKeyObject(filepath: string) {
-  const publicKeyFileContent = readFileSync(filepath, "utf8");
-  const publicKeyObject = createPublicKey({ key: publicKeyFileContent });
-
-  return publicKeyObject;
-}
-
 // To convert iOS public keys to PEM
 const curve25519OIDHeaderLen = 12;
 const Ed25519OIDHeader = new Uint8Array([0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x21, 0x00]);
 export const Ed25519ASNBuffer = Buffer.from(Ed25519OIDHeader, curve25519OIDHeaderLen);
+
+export function loadEd25519PublicKey(filepath: string): { object: KeyObject; raw: string } {
+  const content = readFileSync(filepath, "utf8");
+  const publicKeyObject = createPublicKey({ key: content });
+
+  const rawWithHeader = publicKeyObject.export({ type: "spki", format: "der" });
+  const rawWithoutHeader = rawWithHeader.slice(curve25519OIDHeaderLen);
+
+  return { object: publicKeyObject, raw: rawWithoutHeader.toString("base64") };
+}

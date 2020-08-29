@@ -16,7 +16,8 @@ const P256Filepaths = {
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
 const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
-const P256PublicKeyObject = cryptokit.P256.loadPublicKey(P256Filepaths.publicKeyPath);
+const P256PublicKey = cryptokit.P256.loadPublicKey(P256Filepaths.publicKeyPath);
+console.log("P256 iOS compatible public key = " + P256PublicKey.raw + "\n");
 
 const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
 const Ed25519Filepaths = {
@@ -24,14 +25,15 @@ const Ed25519Filepaths = {
   publicKeyPath: join(Ed25519FolderPath, "public.key"),
 };
 const Ed25519PrivateKeyObject = cryptokit.Ed25519.loadPrivateKey(Ed25519Filepaths.privateKeyPath);
-const Ed25519PublicKeyObject = cryptokit.Ed25519.loadPublicKey(Ed25519Filepaths.publicKeyPath);
+const Ed25519PublicKey = cryptokit.Ed25519.loadPublicKey(Ed25519Filepaths.publicKeyPath);
+console.log("Ed25519 iOS compatible public key = " + Ed25519PublicKey.raw + "\n");
 
 const messageToSignWithP256 = "Example message signed with P256 by nodejs";
 const messageP256Signature = cryptokit.P256.sign(messageToSignWithP256, P256PrivateKeyObject);
 const messageP256SignatureVerification = cryptokit.P256.verify(
   messageToSignWithP256,
   messageP256Signature,
-  P256PublicKeyObject
+  P256PublicKey.object
 );
 console.log(
   'nodejsP256Signature = "' +
@@ -46,7 +48,7 @@ const messageEd25519Signature = cryptokit.Ed25519.sign(messageToSignWithEd25519,
 const messageEd25519SignatureVerification = cryptokit.Ed25519.verify(
   messageToSignWithEd25519,
   messageEd25519Signature,
-  Ed25519PublicKeyObject
+  Ed25519PublicKey.object
 );
 console.log(
   'nodejsEd25519Signature = "' +

@@ -25,7 +25,7 @@ describe("Ed25519 keys", () => {
   });
 
   test("Ed25519 public key loading", () => {
-    expect(cryptokit.Ed25519.loadPublicKey(publicKeyPath)).toEqual(expect.any(KeyObject));
+    expect(cryptokit.Ed25519.loadPublicKey(publicKeyPath).object).toEqual(expect.any(KeyObject));
   });
 });
 

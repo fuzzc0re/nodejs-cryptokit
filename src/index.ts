@@ -1,18 +1,13 @@
 import { randomBytes, createCipheriv, createDecipheriv, sign, verify, createPublicKey, KeyObject } from "crypto";
 
-import { generateP256Keys, loadP256PrivateKeyObject, loadP256PublicKeyObject, P256ASNBuffer } from "./utils/P256";
+import { generateP256Keys, loadP256PrivateKeyObject, loadP256PublicKey, P256ASNBuffer } from "./utils/P256";
 import {
   generateEd25519Keys,
   loadEd25519PrivateKeyObject,
-  loadEd25519PublicKeyObject,
+  loadEd25519PublicKey,
   Ed25519ASNBuffer,
 } from "./utils/Ed25519";
-import {
-  generateX25519Keys,
-  loadX25519PrivateKeyObject,
-  loadX25519PublicKeyObject,
-  X25519ASNBuffer,
-} from "./utils/X25519";
+import { generateX25519Keys, loadX25519PrivateKeyObject, loadX25519PublicKey, X25519ASNBuffer } from "./utils/X25519";
 
 import { hkdf } from "./utils/funcs/hkdf";
 import { dh } from "./utils/funcs/diffieHellman";
@@ -184,7 +179,7 @@ function decryptWithSymmetricKey(
 export const P256 = {
   generateKeys: generateP256Keys,
   loadPrivateKey: loadP256PrivateKeyObject,
-  loadPublicKey: loadP256PublicKeyObject,
+  loadPublicKey: loadP256PublicKey,
   formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "P256"),
   sign: signMessage,
   verify: verifySignature,
@@ -195,7 +190,7 @@ export const P256 = {
 export const Ed25519 = {
   generateKeys: generateEd25519Keys,
   loadPrivateKey: loadEd25519PrivateKeyObject,
-  loadPublicKey: loadEd25519PublicKeyObject,
+  loadPublicKey: loadEd25519PublicKey,
   formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "Ed25519"),
   sign: signMessage,
   verify: verifySignature,
@@ -204,7 +199,7 @@ export const Ed25519 = {
 export const X25519 = {
   generateKeys: generateX25519Keys,
   loadPrivateKey: loadX25519PrivateKeyObject,
-  loadPublicKey: loadX25519PublicKeyObject,
+  loadPublicKey: loadX25519PublicKey,
   formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "X25519"),
   encrypt: encryptWithSymmetricKey,
   decrypt: decryptWithSymmetricKey,
