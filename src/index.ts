@@ -1,13 +1,8 @@
 import { randomBytes, createCipheriv, createDecipheriv, sign, verify, createPublicKey, KeyObject } from "crypto";
 
-import { generateP256Keys, loadP256PrivateKeyObject, loadP256PublicKey, P256ASNBuffer } from "./utils/P256";
-import {
-  generateEd25519Keys,
-  loadEd25519PrivateKeyObject,
-  loadEd25519PublicKey,
-  Ed25519ASNBuffer,
-} from "./utils/Ed25519";
-import { generateX25519Keys, loadX25519PrivateKeyObject, loadX25519PublicKey, X25519ASNBuffer } from "./utils/X25519";
+import { generateP256Keys, loadP256PrivateKey, loadP256PublicKey, P256ASNBuffer } from "./utils/P256";
+import { generateEd25519Keys, loadEd25519PrivateKey, loadEd25519PublicKey, Ed25519ASNBuffer } from "./utils/Ed25519";
+import { generateX25519Keys, loadX25519PrivateKey, loadX25519PublicKey, X25519ASNBuffer } from "./utils/X25519";
 
 import { hkdf } from "./utils/funcs/hkdf";
 import { dh } from "./utils/funcs/diffieHellman";
@@ -53,7 +48,7 @@ function verifySignature(message: string | Buffer, signature: string | Buffer, p
   return verification;
 }
 
-function formatiOSPublicKey(publicKey: string | Buffer, publicKeyType: "P256" | "Ed25519" | "X25519") {
+function formatRawToPublicKeyObject(publicKey: string | Buffer, publicKeyType: "P256" | "Ed25519" | "X25519") {
   let publicKeyBuffer: Buffer;
   if (typeof publicKey === "string") {
     publicKeyBuffer = Buffer.from(publicKey, "base64");
@@ -95,6 +90,20 @@ function formatiOSPublicKey(publicKey: string | Buffer, publicKeyType: "P256" | 
     return keyObject;
   } catch (error) {
     throw error;
+  }
+}
+
+function formatPublicKeyObjectToRaw(publicKey: KeyObject, type: "P256" | "Ed25519" | "X25519") {
+  const rawWithHeader = publicKey.export({ type: "spki", format: "der" });
+
+  if (type === "P256") {
+    const rawWithoutHeader = rawWithHeader.slice(P256ASNBuffer.length + 1);
+
+    return rawWithoutHeader.toString("base64");
+  } else {
+    const rawWithoutHeader = rawWithHeader.slice(Ed25519ASNBuffer.length);
+
+    return rawWithoutHeader.toString("base64");
   }
 }
 
@@ -178,9 +187,10 @@ function decryptWithSymmetricKey(
 
 export const P256 = {
   generateKeys: generateP256Keys,
-  loadPrivateKey: loadP256PrivateKeyObject,
+  loadPrivateKey: loadP256PrivateKey,
   loadPublicKey: loadP256PublicKey,
-  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "P256"),
+  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "P256"),
+  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "P256"),
   sign: signMessage,
   verify: verifySignature,
   encrypt: encryptWithSymmetricKey,
@@ -189,18 +199,20 @@ export const P256 = {
 
 export const Ed25519 = {
   generateKeys: generateEd25519Keys,
-  loadPrivateKey: loadEd25519PrivateKeyObject,
+  loadPrivateKey: loadEd25519PrivateKey,
   loadPublicKey: loadEd25519PublicKey,
-  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "Ed25519"),
+  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "Ed25519"),
+  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "Ed25519"),
   sign: signMessage,
   verify: verifySignature,
 };
 
 export const X25519 = {
   generateKeys: generateX25519Keys,
-  loadPrivateKey: loadX25519PrivateKeyObject,
+  loadPrivateKey: loadX25519PrivateKey,
   loadPublicKey: loadX25519PublicKey,
-  formatiOSPublicKey: (publicKey: string | Buffer) => formatiOSPublicKey(publicKey, "X25519"),
+  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "X25519"),
+  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "X25519"),
   encrypt: encryptWithSymmetricKey,
   decrypt: decryptWithSymmetricKey,
 };

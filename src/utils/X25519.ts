@@ -1,14 +1,6 @@
 import { join } from "path";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import {
-  randomBytes,
-  createHash,
-  createCipheriv,
-  createDecipheriv,
-  createPublicKey,
-  createPrivateKey,
-  KeyObject,
-} from "crypto";
+import { randomBytes, createHash, createCipheriv, createDecipheriv, createPublicKey, createPrivateKey } from "crypto";
 
 import { generateX25519 } from "./funcs/generateX25519";
 
@@ -42,7 +34,7 @@ export function generateX25519Keys(folderpath: string) {
   return { privateKeyPath, publicKeyPath };
 }
 
-export function loadX25519PrivateKeyObject(filepath: string) {
+export function loadX25519PrivateKey(filepath: string) {
   const privateKeyPass = createHash("sha512")
     .update(Buffer.from(process.env.X25519_PASS as string))
     .digest("base64")
@@ -67,12 +59,9 @@ const curve25519OIDHeaderLen = 12;
 const X25519OIDHeader = new Uint8Array([0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e, 0x03, 0x21, 0x00]);
 export const X25519ASNBuffer = Buffer.from(X25519OIDHeader, curve25519OIDHeaderLen);
 
-export function loadX25519PublicKey(filepath: string): { object: KeyObject; raw: string } {
+export function loadX25519PublicKey(filepath: string) {
   const content = readFileSync(filepath, "utf8");
   const publicKeyObject = createPublicKey({ key: content });
 
-  const rawWithHeader = publicKeyObject.export({ type: "spki", format: "der" });
-  const rawWithoutHeader = rawWithHeader.slice(curve25519OIDHeaderLen);
-
-  return { object: publicKeyObject, raw: rawWithoutHeader.toString("base64") };
+  return publicKeyObject;
 }

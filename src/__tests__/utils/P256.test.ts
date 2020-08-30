@@ -25,7 +25,7 @@ describe("P256 keys", () => {
   });
 
   test("P256 public key loading", () => {
-    expect(cryptokit.P256.loadPublicKey(publicKeyPath).object).toEqual(expect.any(KeyObject));
+    expect(cryptokit.P256.loadPublicKey(publicKeyPath)).toEqual(expect.any(KeyObject));
   });
 });
 

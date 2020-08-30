@@ -5,7 +5,7 @@ config({ path: join(__dirname, ".env") });
 
 const cryptokit = require("../lib/index");
 
-const { iOSP256PublicKeyObject, iOSX25519PublicKeyObject } = require("./keys/iOS");
+const { iOSP256PublicKey, iOSX25519PublicKey } = require("./keys/iOS");
 
 // const P256Filepaths = utils.generateP256Keys(P256FolderPath);
 // const X25519Filepaths = utils.generateX25519Keys(X25519FolderPath);
@@ -15,24 +15,22 @@ const P256Filepaths = {
   privateKeyPath: join(P256FolderPath, "private.key"),
   publicKeyPath: join(P256FolderPath, "public.key"),
 };
-const P256PrivateKeyObject = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
+const P256PrivateKey = cryptokit.P256.loadPrivateKey(P256Filepaths.privateKeyPath);
 
 const X25519FolderPath = join(__dirname, "keys", "X25519");
 const X25519Filepaths = {
   privateKeyPath: join(X25519FolderPath, "private.key"),
   publicKeyPath: join(X25519FolderPath, "public.key"),
 };
-const X25519PrivateKeyObject = cryptokit.X25519.loadPrivateKey(X25519Filepaths.privateKeyPath);
+const X25519PrivateKey = cryptokit.X25519.loadPrivateKey(X25519Filepaths.privateKeyPath);
 const X25519PublicKey = cryptokit.X25519.loadPublicKey(X25519Filepaths.publicKeyPath);
-console.log("X25519 iOS compatible public key = " + X25519PublicKey.raw + "\n");
+
+const iOSCompatibleX25519PublicKey = cryptokit.X25519.formatPublicKeyToRaw(X25519PublicKey);
+console.log("iOS Compatible X25519 public key = " + iOSCompatibleX25519PublicKey);
 
 // Test P256 iOS
 const messageToEncryptWithP256 = "Hi! I am an end-to-end encrypted example message from nodejs with symmetric P256 key";
-const encryptedMessageWithP256 = cryptokit.P256.encrypt(
-  messageToEncryptWithP256,
-  P256PrivateKeyObject,
-  iOSP256PublicKeyObject
-);
+const encryptedMessageWithP256 = cryptokit.P256.encrypt(messageToEncryptWithP256, P256PrivateKey, iOSP256PublicKey);
 console.log('Nodejs encrypted message with P256 = "' + encryptedMessageWithP256.message + '"\n');
 console.log('Nodejs P256 Encrypted message salt = "' + encryptedMessageWithP256.symmetricKeySalt + '"\n');
 
@@ -41,8 +39,8 @@ const iOSP256EncryptedMessage =
 const iOSP256SymmetricKeySalt = "Gfb/vwvj0Dmaxt5UqhZ6Gg==";
 const decryptediOSP256Message = cryptokit.P256.decrypt(
   iOSP256EncryptedMessage,
-  P256PrivateKeyObject,
-  iOSP256PublicKeyObject,
+  P256PrivateKey,
+  iOSP256PublicKey,
   iOSP256SymmetricKeySalt
 );
 console.log('Decrypted iOS P256 message = "' + decryptediOSP256Message + '"\n');
@@ -52,8 +50,8 @@ const messageToEncryptWithX25519 =
   "Hi! I am an end-to-end encrypted example message from nodejs with symmetric P256 key";
 const encryptedMessageWithX25519 = cryptokit.X25519.encrypt(
   messageToEncryptWithX25519,
-  X25519PrivateKeyObject,
-  iOSX25519PublicKeyObject
+  X25519PrivateKey,
+  iOSX25519PublicKey
 );
 console.log('Nodejs encrypted message with X25519: "' + encryptedMessageWithX25519.message + '"\n');
 console.log('Nodejs X25519 encrypted message salt: "' + encryptedMessageWithX25519.symmetricKeySalt + '"\n');
@@ -63,8 +61,8 @@ const iOSX25519EncryptedMessage =
 const iOSX25519SymmetricKeySalt = "gfSsGl0yvkNQaJHXw/WLvw==";
 const decryptediOSX25519Message = cryptokit.X25519.decrypt(
   iOSX25519EncryptedMessage,
-  X25519PrivateKeyObject,
-  iOSX25519PublicKeyObject,
+  X25519PrivateKey,
+  iOSX25519PublicKey,
   iOSX25519SymmetricKeySalt
 );
 console.log('Decrypted iOS X25519 message = "' + decryptediOSX25519Message + '"\n');
