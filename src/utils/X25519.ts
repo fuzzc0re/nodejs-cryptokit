@@ -1,67 +1,135 @@
-import { join } from "path";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { randomBytes, createHash, createCipheriv, createDecipheriv, createPublicKey, createPrivateKey } from "crypto";
+import {
+  generateKeyPair,
+  randomBytes,
+  createCipheriv,
+  createDecipheriv,
+  createPublicKey,
+  createPrivateKey,
+  KeyObject,
+} from "crypto";
 
-import { generateX25519 } from "./funcs/generateX25519";
+// import { generateX25519 } from "./funcs/generateX25519";
+import { hkdf } from "./funcs/hkdf";
+import { convertToPEM } from "./funcs/convertToPEM";
 
+const algorithm = "aes-256-gcm";
 const hash = "sha512";
-const algorithm = "aes-256-ctr";
+const saltLength = 64;
+const symmetricKeyLength = 32;
+const ivLength = 16;
+const authTagLength = 16;
 
-export function generateX25519Keys(folderpath: string) {
-  if (!existsSync(folderpath)) {
-    mkdirSync(folderpath, { recursive: true });
-  }
-
-  const iv = randomBytes(16).toString("hex").slice(0, 16);
-  const pass = createHash(hash)
-    .update(Buffer.from(process.env.X25519_PASS as string))
-    .digest("base64")
-    .substr(0, 32);
-
-  const { publicKey, privateKey } = generateX25519();
-
-  const privateKeyBuffer = Buffer.from(privateKey, "utf8");
-  const cipher = createCipheriv(algorithm, pass, iv);
-  const privateKeyCipherBuffer = cipher.update(privateKeyBuffer);
-  const privateKeyBufferFinal = Buffer.concat([privateKeyCipherBuffer, cipher.final()]);
-
-  const privateKeyPath = join(folderpath, "private.key");
-  const publicKeyPath = join(folderpath, "public.key");
-
-  writeFileSync(privateKeyPath, iv + ":" + privateKeyBufferFinal.toString("base64"));
-  writeFileSync(publicKeyPath, publicKey);
-
-  return { privateKeyPath, publicKeyPath };
-}
-
-export function loadX25519PrivateKey(filepath: string) {
-  const privateKeyPass = createHash("sha512")
-    .update(Buffer.from(process.env.X25519_PASS as string))
-    .digest("base64")
-    .substr(0, 32);
-  const privateKeyFileContent = readFileSync(filepath, "utf8");
-  const privateKeyFileContentParts = privateKeyFileContent.split(":");
-  const privateKeyDecryptionIv = privateKeyFileContentParts.shift();
-  const privateKeyFileContentKey = privateKeyFileContentParts.join(":");
-  const privateKeyEncrypted = Buffer.from(privateKeyFileContentKey, "base64");
-  const privateKeyDecipher = createDecipheriv(algorithm, privateKeyPass, privateKeyDecryptionIv as string);
-  const privateKeyDeciphered = privateKeyDecipher.update(privateKeyEncrypted);
-  const privateKey = Buffer.concat([privateKeyDeciphered, privateKeyDecipher.final()]);
-  const privateKeyObject = createPrivateKey({
-    key: privateKey,
-  });
-
-  return privateKeyObject;
-}
-
-// To convert iOS public keys to PEM
-const curve25519OIDHeaderLen = 12;
+const X25519OIDHeaderLength = 12;
 const X25519OIDHeader = new Uint8Array([0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e, 0x03, 0x21, 0x00]);
-export const X25519ASNBuffer = Buffer.from(X25519OIDHeader, curve25519OIDHeaderLen);
+const X25519ASNBuffer = Buffer.from(X25519OIDHeader, X25519OIDHeaderLength);
 
-export function loadX25519PublicKey(filepath: string) {
-  const content = readFileSync(filepath, "utf8");
-  const publicKeyObject = createPublicKey({ key: content });
+export function generateX25519Keys(password?: string): Promise<{ publicKey: string; privateKey: string }> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      generateKeyPair(
+        "x25519",
+        {
+          publicKeyEncoding: {
+            type: "spki",
+            format: "pem",
+          },
+          privateKeyEncoding: {
+            type: "pkcs8",
+            format: "pem",
+          },
+        },
+        (err, publicKey, privateKey) => {
+          if (err) reject(err);
 
-  return publicKeyObject;
+          const salt = randomBytes(saltLength);
+          const keyBuffer = Buffer.from(password ? password : (process.env.X25519_PASS as string), "utf8");
+          const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
+
+          const iv = randomBytes(ivLength);
+          const cipher = createCipheriv(algorithm, key, iv);
+          const privateKeyCipherBuffer = cipher.update(privateKey);
+          const privateKeyBufferFinal = Buffer.concat([privateKeyCipherBuffer, cipher.final()]);
+          const authTag = cipher.getAuthTag();
+          const privateKeyEncrypted = Buffer.concat([salt, iv, privateKeyBufferFinal, authTag]);
+          const privateKeyEncryptedBase64 = privateKeyEncrypted.toString("base64");
+
+          resolve({ publicKey, privateKey: privateKeyEncryptedBase64 });
+        }
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function loadX25519PrivateKey(content: string | Buffer, password?: string): Promise<KeyObject> {
+  return new Promise((resolve, reject) => {
+    try {
+      let contentBuffer: Buffer;
+      if (Buffer.isBuffer(content)) {
+        contentBuffer = content;
+      } else {
+        contentBuffer = Buffer.from(content, "base64");
+      }
+      const contentBufferLength = contentBuffer.length;
+      const salt = contentBuffer.slice(0, saltLength);
+      const iv = contentBuffer.slice(saltLength, saltLength + ivLength);
+      const encryptedContent = contentBuffer.slice(saltLength + ivLength, contentBufferLength - authTagLength);
+      const authTag = contentBuffer.slice(contentBufferLength - authTagLength, contentBufferLength);
+
+      const keyBuffer = Buffer.from(password ? password : (process.env.X25519_PASS as string), "utf8");
+      const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
+
+      const decipher = createDecipheriv(algorithm, key, iv);
+      decipher.setAuthTag(authTag);
+      const decrypted = decipher.update(encryptedContent);
+      const privateKey = Buffer.concat([decrypted, decipher.final()]);
+      const privateKeyObject = createPrivateKey({ key: privateKey });
+
+      resolve(privateKeyObject);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function loadX25519PublicKey(content: string): Promise<KeyObject> {
+  return new Promise((resolve, reject) => {
+    try {
+      const isPEM = content.includes("-----BEGIN PUBLIC KEY-----") && content.includes("-----END PUBLIC KEY-----");
+      let publicKey = content;
+      if (!isPEM) {
+        const publicKeyBuffer = Buffer.from(content, "base64");
+        if (publicKeyBuffer.length === 44) {
+          publicKey = convertToPEM(content);
+        } else if (publicKeyBuffer.length === 32) {
+          const publicKeyWithHeader = Buffer.concat([X25519ASNBuffer, publicKeyBuffer]);
+          const publicKeyWithHeaderBase64 = publicKeyWithHeader.toString("base64");
+          publicKey = convertToPEM(publicKeyWithHeaderBase64);
+        } else {
+          reject(new Error("Invalid Ed25519 key length"));
+        }
+      }
+
+      const publicKeyObject = createPublicKey({ key: publicKey });
+
+      resolve(publicKeyObject);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function convertX25519PublicKeyToRaw(publicKey: KeyObject): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      const rawWithHeader = publicKey.export({ type: "spki", format: "der" });
+      const rawWithoutHeader = rawWithHeader.slice(X25519OIDHeaderLength);
+      const rawPublicKey = rawWithoutHeader.toString("base64");
+
+      resolve(rawPublicKey);
+    } catch (error) {
+      reject(error);
+    }
+  });
 }

@@ -1,81 +1,72 @@
 import { createHmac } from "crypto";
 
-const hashLength = (hash: string) => {
+function getHashLength(hash: "sha256" | "sha384" | "sha512") {
   switch (hash) {
     case "sha256":
       return 32;
-    case "sha512":
-      return 64;
-    case "sha224":
-      return 28;
     case "sha384":
       return 48;
-    case "sha3-256":
-      return 32;
-    case "sha3-512":
-      return 64;
-    case "sha3-224":
-      return 28;
-    case "sha3-384":
-      return 48;
-    case "blake2s256":
-      return 32;
-    case "blake2b512":
-      return 64;
     default: {
-      // "sha1"
-      return 20;
+      // "sha512"
+      return 64;
     }
   }
-};
-
-function hkdfExtract(hash: string, hashLen: number, ikm: Buffer | string, salt: Buffer | string) {
-  const bIkm = Buffer.isBuffer(ikm) ? ikm : Buffer.from(ikm);
-  const bSalt = salt && salt.length ? Buffer.from(salt) : Buffer.alloc(hashLen, 0);
-
-  return createHmac(hash, bSalt).update(bIkm).digest();
 }
 
-function hkdfExpand(hash: string, hashLen: number, prk: Buffer | string, length: number, info: Buffer | string) {
-  const bInfo = Buffer.from(info || "");
-  const infoLen = bInfo.length;
+function extract(
+  hash: "sha256" | "sha384" | "sha512",
+  hashLength: 32 | 48 | 64,
+  ikm: string | Buffer,
+  salt: string | Buffer
+) {
+  const ikmBuffer = Buffer.isBuffer(ikm) ? ikm : Buffer.from(ikm);
+  const saltBuffer = salt && salt.length ? Buffer.from(salt) : Buffer.alloc(hashLength, 0);
 
-  const steps = Math.ceil(length / hashLen);
+  return createHmac(hash, saltBuffer).update(ikmBuffer).digest();
+}
+
+function expand(
+  hash: "sha256" | "sha384" | "sha512",
+  hashLength: 32 | 48 | 64,
+  prk: string | Buffer,
+  length: number,
+  info: string | Buffer
+) {
+  const infoBuffer = Buffer.from(info || "");
+  const infoLength = infoBuffer.length;
+  const steps = Math.ceil(length / hashLength);
 
   if (steps > 0xff) {
     throw new Error(`OKM length ${length} is too long for ${hash} hash`);
   }
 
-  // use single buffer with unnecessary create/copy/move operations
-  const t = Buffer.alloc(hashLen * steps + infoLen + 1);
+  const t = Buffer.alloc(hashLength * steps + infoLength + 1);
 
-  for (let c = 1, start = 0, end = 0; c <= steps; ++c) {
-    // add info
-    bInfo.copy(t, end);
-    // add counter
-    t[end + infoLen] = c;
+  for (let counter = 1, start = 0, end = 0; counter <= steps; ++counter) {
+    infoBuffer.copy(t, end);
+    t[end + infoLength] = counter;
 
     createHmac(hash, prk)
-      // use view: T(C) = T(C-1) | info | C
-      .update(t.slice(start, end + infoLen + 1))
+      .update(t.slice(start, end + infoLength + 1))
       .digest()
-      // put back to the same buffer
       .copy(t, end);
 
-    start = end; // used for T(C-1) start
-    end += hashLen; // used for T(C-1) end & overall end
+    start = end;
+    end += hashLength;
   }
 
   return t.slice(0, length);
 }
 
 export function hkdf(
-  ikm: Buffer | string,
+  ikm: string | Buffer,
   length: number,
-  { salt = Buffer.from(""), info = "", hash = "SHA-256" } = {}
+  salt: Buffer,
+  info = "",
+  hash: "sha256" | "sha384" | "sha512" = "sha512"
 ) {
-  hash = hash.toLowerCase().replace("-", "");
-  const hashLen = hashLength(hash);
-  const prk = hkdfExtract(hash, hashLen, ikm, salt);
-  return hkdfExpand(hash, hashLen, prk, length, info);
+  const hashLength = getHashLength(hash);
+  const prk = extract(hash, hashLength, ikm, salt);
+
+  return expand(hash, hashLength, prk, length, info);
 }

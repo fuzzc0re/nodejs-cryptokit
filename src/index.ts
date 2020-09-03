@@ -1,160 +1,128 @@
-import { randomBytes, createCipheriv, createDecipheriv, sign, verify, createPublicKey, KeyObject } from "crypto";
+import { randomBytes, createCipheriv, createDecipheriv, sign, verify, KeyObject, diffieHellman } from "crypto";
 
-import { generateP256Keys, loadP256PrivateKey, loadP256PublicKey, P256ASNBuffer } from "./utils/P256";
-import { generateEd25519Keys, loadEd25519PrivateKey, loadEd25519PublicKey, Ed25519ASNBuffer } from "./utils/Ed25519";
-import { generateX25519Keys, loadX25519PrivateKey, loadX25519PublicKey, X25519ASNBuffer } from "./utils/X25519";
+import { generateP256Keys, loadP256PrivateKey, loadP256PublicKey, convertP256PublicKeyToRaw } from "./utils/P256";
+import {
+  generateEd25519Keys,
+  loadEd25519PrivateKey,
+  loadEd25519PublicKey,
+  convertEd25519PublicKeyToRaw,
+} from "./utils/Ed25519";
+import {
+  generateX25519Keys,
+  loadX25519PrivateKey,
+  loadX25519PublicKey,
+  convertX25519PublicKeyToRaw,
+} from "./utils/X25519";
 
 import { hkdf } from "./utils/funcs/hkdf";
-import { dh } from "./utils/funcs/diffieHellman";
 
-// if (!process.env.P256_PASS && !process.env.ED25519_PASS && !process.env.X25519_PASS) {
-//   throw new Error("No passwords provided in .env file");
-// }
+const symmetricKeyHash = "sha512";
+const symmetricKeySaltLength = 64;
+const symmetricKeyLength = 32;
+const ivLength = 12;
+const authTagLength = 16;
 
-function signMessage(message: string | Buffer, privateKey: KeyObject) {
-  let messageData: Buffer;
-  if (typeof message === "string") {
-    messageData = Buffer.from(message, "utf8");
-  } else {
-    messageData = message;
-  }
+function signMessage(message: string | Buffer, privateKey: KeyObject): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      let messageData: Buffer;
+      if (typeof message === "string") {
+        messageData = Buffer.from(message, "utf8");
+      } else {
+        messageData = message;
+      }
 
-  try {
-    const messageSignature = sign(null, messageData, privateKey);
+      const messageSignature = sign(null, messageData, privateKey);
+      const messageSignatureBase64 = messageSignature.toString("base64");
 
-    return messageSignature.toString("base64");
-  } catch (error) {
-    throw error;
-  }
-}
-
-function verifySignature(message: string | Buffer, signature: string | Buffer, publicKey: KeyObject) {
-  let messageData: Buffer;
-  if (typeof message === "string") {
-    messageData = Buffer.from(message, "utf8");
-  } else {
-    messageData = message;
-  }
-
-  let signatureData: Buffer;
-  if (typeof signature === "string") {
-    signatureData = Buffer.from(signature, "base64");
-  } else {
-    signatureData = signature;
-  }
-
-  const verification = verify(null, messageData, publicKey, signatureData);
-
-  return verification;
-}
-
-function formatRawToPublicKeyObject(publicKey: string | Buffer, publicKeyType: "P256" | "Ed25519" | "X25519") {
-  let publicKeyBuffer: Buffer;
-  if (typeof publicKey === "string") {
-    publicKeyBuffer = Buffer.from(publicKey, "base64");
-  } else {
-    publicKeyBuffer = publicKey;
-  }
-
-  let publicKeyData: Buffer;
-  if (publicKeyType === "P256") {
-    publicKeyData = Buffer.concat([P256ASNBuffer, publicKeyBuffer]);
-  } else if (publicKeyType === "Ed25519") {
-    publicKeyData = Buffer.concat([Ed25519ASNBuffer, publicKeyBuffer]);
-  } else {
-    publicKeyData = Buffer.concat([X25519ASNBuffer, publicKeyBuffer]);
-  }
-
-  const publicKeyWithASN = publicKeyData.toString("base64");
-
-  let resultString = "-----BEGIN PUBLIC KEY-----\n";
-  let charCount = 0;
-  let currentLine = "";
-  for (const i of publicKeyWithASN) {
-    charCount += 1;
-    currentLine += i;
-    if (charCount === 64) {
-      resultString += currentLine + "\n";
-      charCount = 0;
-      currentLine = "";
+      resolve(messageSignatureBase64);
+    } catch (error) {
+      reject(error);
     }
-  }
-  if (currentLine.length > 0) {
-    resultString += currentLine + "\n";
-  }
-  resultString += "-----END PUBLIC KEY-----";
-
-  try {
-    const keyObject = createPublicKey({ key: resultString });
-
-    return keyObject;
-  } catch (error) {
-    throw error;
-  }
+  });
 }
 
-function formatPublicKeyObjectToRaw(publicKey: KeyObject, type: "P256" | "Ed25519" | "X25519") {
-  const rawWithHeader = publicKey.export({ type: "spki", format: "der" });
+function verifySignature(message: string | Buffer, signature: string | Buffer, publicKey: KeyObject): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    try {
+      let messageData: Buffer;
+      if (typeof message === "string") {
+        messageData = Buffer.from(message, "utf8");
+      } else {
+        messageData = message;
+      }
 
-  if (type === "P256") {
-    const rawWithoutHeader = rawWithHeader.slice(P256ASNBuffer.length + 1);
+      let signatureData: Buffer;
+      if (typeof signature === "string") {
+        signatureData = Buffer.from(signature, "base64");
+      } else {
+        signatureData = signature;
+      }
 
-    return rawWithoutHeader.toString("base64");
-  } else {
-    const rawWithoutHeader = rawWithHeader.slice(Ed25519ASNBuffer.length);
+      const verification = verify(null, messageData, publicKey, signatureData);
 
-    return rawWithoutHeader.toString("base64");
-  }
+      resolve(verification);
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
 
 function generateSymmetricKey(
   privateKey: KeyObject,
   publicKey: KeyObject,
   salt?: string | Buffer
-): { key: Buffer; salt: Buffer } {
-  const sharedSecret = dh(publicKey, privateKey);
+): Promise<{ key: Buffer; salt: Buffer }> {
+  return new Promise((resolve, reject) => {
+    try {
+      const sharedSecret = diffieHellman({ privateKey, publicKey });
 
-  let symmetricKeySalt: Buffer;
-  if (salt) {
-    if (Buffer.isBuffer(salt)) {
-      symmetricKeySalt = salt;
-    } else if (typeof salt === "string") {
-      symmetricKeySalt = Buffer.from(salt, "base64");
-    } else {
-      throw new Error("Invalid symmetric key salt");
+      let symmetricKeySalt: Buffer;
+      if (salt) {
+        if (Buffer.isBuffer(salt)) {
+          symmetricKeySalt = salt;
+        } else if (typeof salt === "string") {
+          symmetricKeySalt = Buffer.from(salt, "base64");
+        } else {
+          throw new Error("Invalid symmetric key salt");
+        }
+      } else {
+        symmetricKeySalt = randomBytes(symmetricKeySaltLength);
+      }
+
+      const symmetricKey = hkdf(sharedSecret, symmetricKeyLength, symmetricKeySalt, "", symmetricKeyHash);
+
+      resolve({ key: symmetricKey, salt: symmetricKeySalt });
+    } catch (error) {
+      reject(error);
     }
-  } else {
-    symmetricKeySalt = randomBytes(16);
-  }
-
-  const symmetricKey = hkdf(sharedSecret, sharedSecret.length, {
-    salt: symmetricKeySalt,
-    info: "",
-    hash: "sha256",
   });
-
-  return { key: symmetricKey, salt: symmetricKeySalt };
 }
-
-const ivLength = 12;
-const authTagLength = 16;
 
 function encryptWithSymmetricKey(
   message: string,
   privateKey: KeyObject,
   publicKey: KeyObject
-): { message: string; symmetricKeySalt: string } {
-  const symmetricKey = generateSymmetricKey(privateKey, publicKey);
+): Promise<{ message: string; symmetricKeySalt: string }> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const symmetricKey = await generateSymmetricKey(privateKey, publicKey);
+      const symmetricKeySaltBase64 = symmetricKey.salt.toString("base64");
 
-  const iv = randomBytes(ivLength);
-  const cipher = createCipheriv("chacha20-poly1305", symmetricKey.key, iv, {
-    authTagLength,
+      const iv = randomBytes(ivLength);
+      const cipher = createCipheriv("chacha20-poly1305", symmetricKey.key, iv, {
+        authTagLength,
+      });
+      const encryptedBuffer = Buffer.concat([cipher.update(message, "utf8"), cipher.final()]);
+      const tag = cipher.getAuthTag();
+      const encryptedMessage = Buffer.concat([iv, encryptedBuffer, tag]);
+      const encryptedMessageBase64 = encryptedMessage.toString("base64");
+
+      resolve({ message: encryptedMessageBase64, symmetricKeySalt: symmetricKeySaltBase64 });
+    } catch (error) {
+      reject(error);
+    }
   });
-  const encryptedBuffer = Buffer.concat([cipher.update(message, "utf8"), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  const encryptedMessage = Buffer.concat([iv, encryptedBuffer, tag]);
-
-  return { message: encryptedMessage.toString("base64"), symmetricKeySalt: symmetricKey.salt.toString("base64") };
 }
 
 function decryptWithSymmetricKey(
@@ -162,35 +130,40 @@ function decryptWithSymmetricKey(
   privateKey: KeyObject,
   publicKey: KeyObject,
   symmetricKeySalt: string | Buffer
-) {
-  let encryptedMessageData: Buffer;
-  if (typeof encryptedMessage === "string") {
-    encryptedMessageData = Buffer.from(encryptedMessage, "base64");
-  } else {
-    encryptedMessageData = encryptedMessage;
-  }
+): Promise<string> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let encryptedMessageData: Buffer;
+      if (typeof encryptedMessage === "string") {
+        encryptedMessageData = Buffer.from(encryptedMessage, "base64");
+      } else {
+        encryptedMessageData = encryptedMessage;
+      }
 
-  const symmetricKey = generateSymmetricKey(privateKey, publicKey, symmetricKeySalt);
+      const symmetricKey = await generateSymmetricKey(privateKey, publicKey, symmetricKeySalt);
 
-  const encryptedMessageDataLength = encryptedMessageData.length;
-  const iv = encryptedMessageData.slice(0, ivLength);
-  const encryptedText = encryptedMessageData.slice(ivLength, encryptedMessageDataLength - authTagLength);
-  const tag = encryptedMessageData.slice(encryptedMessageDataLength - authTagLength, encryptedMessageDataLength);
-  const decipher = createDecipheriv("chacha20-poly1305", symmetricKey.key, iv, {
-    authTagLength,
+      const encryptedMessageDataLength = encryptedMessageData.length;
+      const iv = encryptedMessageData.slice(0, ivLength);
+      const encryptedText = encryptedMessageData.slice(ivLength, encryptedMessageDataLength - authTagLength);
+      const tag = encryptedMessageData.slice(encryptedMessageDataLength - authTagLength, encryptedMessageDataLength);
+      const decipher = createDecipheriv("chacha20-poly1305", symmetricKey.key, iv, {
+        authTagLength,
+      });
+      decipher.setAuthTag(tag);
+      const decrypted = decipher.update(encryptedText, "binary", "utf8") + decipher.final("utf8");
+
+      resolve(decrypted);
+    } catch (error) {
+      reject(error);
+    }
   });
-  decipher.setAuthTag(tag);
-  const decrypted = decipher.update(encryptedText, "binary", "utf8") + decipher.final("utf8");
-
-  return decrypted;
 }
 
 export const P256 = {
   generateKeys: generateP256Keys,
   loadPrivateKey: loadP256PrivateKey,
   loadPublicKey: loadP256PublicKey,
-  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "P256"),
-  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "P256"),
+  formatPublicKeyToRaw: convertP256PublicKeyToRaw,
   sign: signMessage,
   verify: verifySignature,
   encrypt: encryptWithSymmetricKey,
@@ -201,8 +174,7 @@ export const Ed25519 = {
   generateKeys: generateEd25519Keys,
   loadPrivateKey: loadEd25519PrivateKey,
   loadPublicKey: loadEd25519PublicKey,
-  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "Ed25519"),
-  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "Ed25519"),
+  formatPublicKeyToRaw: convertEd25519PublicKeyToRaw,
   sign: signMessage,
   verify: verifySignature,
 };
@@ -211,8 +183,7 @@ export const X25519 = {
   generateKeys: generateX25519Keys,
   loadPrivateKey: loadX25519PrivateKey,
   loadPublicKey: loadX25519PublicKey,
-  formatRawToPublicKey: (publicKey: string | Buffer) => formatRawToPublicKeyObject(publicKey, "X25519"),
-  formatPublicKeyToRaw: (publicKey: KeyObject) => formatPublicKeyObjectToRaw(publicKey, "X25519"),
+  formatPublicKeyToRaw: convertX25519PublicKeyToRaw,
   encrypt: encryptWithSymmetricKey,
   decrypt: decryptWithSymmetricKey,
 };

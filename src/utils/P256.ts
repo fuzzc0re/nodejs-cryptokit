@@ -1,50 +1,9 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { generateKeyPairSync, createPublicKey, createPrivateKey } from "crypto";
-import { join } from "path";
+import { generateKeyPair, createPublicKey, createPrivateKey, KeyObject } from "crypto";
+
+import { convertToPEM } from "./funcs/convertToPEM";
 
 const algorithm = "aes-256-ctr";
 
-export function generateP256Keys(folderpath: string) {
-  if (!existsSync(folderpath)) {
-    mkdirSync(folderpath, { recursive: true });
-  }
-
-  const p256Keys = generateKeyPairSync("ec", {
-    namedCurve: "prime256v1",
-    publicKeyEncoding: {
-      type: "spki",
-      format: "pem",
-    },
-    privateKeyEncoding: {
-      type: "sec1",
-      format: "pem",
-      cipher: algorithm,
-      passphrase: process.env.P256_PASS,
-    },
-  });
-
-  const privateKeyPath = join(folderpath, "private.key");
-  const publicKeyPath = join(folderpath, "public.key");
-
-  writeFileSync(privateKeyPath, p256Keys.privateKey);
-  writeFileSync(publicKeyPath, p256Keys.publicKey);
-
-  return { privateKeyPath, publicKeyPath };
-}
-
-export function loadP256PrivateKey(filepath: string) {
-  const content = readFileSync(filepath, "utf8");
-  const privateKeyObject = createPrivateKey({
-    key: content,
-    type: "sec1",
-    format: "pem",
-    passphrase: process.env.P256_PASS,
-  });
-
-  return privateKeyObject;
-}
-
-// To convert iOS public keys to PEM
 const P256OIDHeader = new Uint8Array([
   0x30,
   0x59,
@@ -73,12 +32,93 @@ const P256OIDHeader = new Uint8Array([
   0x42,
   0x00,
 ]);
-const P256OIDHeaderLen = 26;
-export const P256ASNBuffer = Buffer.from(P256OIDHeader, P256OIDHeaderLen);
+const P256OIDHeaderLength = 26;
+const P256ASNBuffer = Buffer.from(P256OIDHeader, P256OIDHeaderLength);
 
-export function loadP256PublicKey(filepath: string) {
-  const content = readFileSync(filepath, "utf8");
-  const publicKeyObject = createPublicKey({ key: content });
+export async function generateP256Keys(password?: string): Promise<{ publicKey: string; privateKey: string }> {
+  return new Promise((resolve, reject) => {
+    try {
+      generateKeyPair(
+        "ec",
+        {
+          namedCurve: "prime256v1",
+          publicKeyEncoding: {
+            type: "spki",
+            format: "pem",
+          },
+          privateKeyEncoding: {
+            type: "sec1",
+            format: "pem",
+            cipher: algorithm,
+            passphrase: password ? password : process.env.P256_PASS,
+          },
+        },
+        (err, publicKey, privateKey) => {
+          if (err) reject(err);
 
-  return publicKeyObject;
+          resolve({ publicKey, privateKey });
+        }
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function loadP256PrivateKey(content: string, password?: string): Promise<KeyObject> {
+  return new Promise((resolve, reject) => {
+    try {
+      const privateKeyObject = createPrivateKey({
+        key: content,
+        type: "sec1",
+        format: "pem",
+        passphrase: password ? password : process.env.P256_PASS,
+      });
+
+      resolve(privateKeyObject);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function loadP256PublicKey(content: string): Promise<KeyObject> {
+  return new Promise((resolve, reject) => {
+    try {
+      const isPEM = content.includes("-----BEGIN PUBLIC KEY-----") && content.includes("-----END PUBLIC KEY-----");
+      let publicKey = content;
+      if (!isPEM) {
+        const publicKeyBuffer = Buffer.from(content, "base64");
+        if (publicKeyBuffer.length === 91) {
+          publicKey = convertToPEM(content);
+        } else if (publicKeyBuffer.length === 65) {
+          const publicKeyWithHeader = Buffer.concat([P256ASNBuffer, publicKeyBuffer]);
+          const publicKeyWithHeaderBase64 = publicKeyWithHeader.toString("base64");
+          publicKey = convertToPEM(publicKeyWithHeaderBase64);
+        } else {
+          reject(new Error("Invalid Ed25519 key length"));
+        }
+      }
+
+      const publicKeyObject = createPublicKey({ key: publicKey });
+
+      resolve(publicKeyObject);
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+export function convertP256PublicKeyToRaw(publicKey: KeyObject): Promise<string> {
+  return new Promise((resolve, reject) => {
+    try {
+      const rawWithHeader = publicKey.export({ type: "spki", format: "der" });
+      const rawWithoutHeader = rawWithHeader.slice(P256OIDHeaderLength + 1);
+      const rawPublicKey = rawWithoutHeader.toString("base64");
+
+      resolve(rawPublicKey);
+    } catch (error) {
+      reject(error);
+    }
+  });
 }
