@@ -134,8 +134,6 @@ In order to encrypt and decrypt a message with symmetric key you do the followin
 ```typescript
 import cryptokit from "cryptokit";
 
-import cryptokit from "cryptokit";
-
 async function app() {
   //
   // Previous code
