@@ -23,11 +23,13 @@ fileprivate func generateRandomBytes(length: Int) throws -> Data? {
 }
 
 // String between PEM headers
-let nodejsP256PublicKeyBase64 = "ks/i+CSZ7OCesuKThh5Zy7Cm8vFHUiStaXw5UA6noER+EDfKcoqKZQAPRgcLsTWOCFUQjCGpBxZKAjnb5ju6WQ=="
-let nodejsEd25519PublicKeyBase64 = "huYswoaOOyVQPvMWvpeaWswgNOSeaaoQFS1twAarMdY="
-let nodejsX25519PublicKeyBase64 = "osCew4tzIIAJQT37VfhcjwUNerbz7EnDHilQ2rFJtWk="
+let nodejsP256PublicKeyBase64 = "myeIjJ2QtbnA9xs5CEjTUEEpZ9yYuzTLSQnwZknCJVnzunlddQBcTpIynGLqaFM+ar+Gpyc45t7jjRcHzzGdMQ=="
+let nodejsEd25519PublicKeyBase64 = "bDdCKL1MtrVuLKyf0YCsKYFlhMlgtJRFACu2CShKVoY="
+let nodejsX25519PublicKeyBase64 = "KbH8dSp1frTmLPp+LGPpM5fLnncR7J3xSQDSJKPZg0o="
 
 struct Crypto {
+  
+  static let symmetricKeySaltLength = 64
   
   struct NIST_P256 {
     
@@ -156,9 +158,9 @@ struct Crypto {
       do {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: publicKey)
-        let symmetricKeySalt = try generateRandomBytes(length: 16)
+        let symmetricKeySalt = try generateRandomBytes(length: symmetricKeySaltLength)
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt!,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -185,9 +187,9 @@ struct Crypto {
       do {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: nodejsKeyAgreementPublicKey())
-        let symmetricKeySalt = try generateRandomBytes(length: 16)
+        let symmetricKeySalt = try generateRandomBytes(length: symmetricKeySaltLength)
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt!,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -221,7 +223,7 @@ struct Crypto {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: publicKey)
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -251,7 +253,7 @@ struct Crypto {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: nodejsKeyAgreementPublicKey())
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -362,9 +364,9 @@ struct Crypto {
       do {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: publicKey)
-        let symmetricKeySalt = try generateRandomBytes(length: 16)!
+        let symmetricKeySalt = try generateRandomBytes(length: symmetricKeySaltLength)!
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -391,9 +393,9 @@ struct Crypto {
       do {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: nodejsPublicKey())
-        let symmetricKeySalt = try generateRandomBytes(length: 16)!
+        let symmetricKeySalt = try generateRandomBytes(length: symmetricKeySaltLength)!
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -424,7 +426,7 @@ struct Crypto {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: publicKey)
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32
@@ -452,7 +454,7 @@ struct Crypto {
         let privateKey = try getKeyAgreementPrivateKey(representation: privateKeyRepresentation)
         let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: nodejsPublicKey())
         let symmetricKey = sharedSecret.hkdfDerivedSymmetricKey(
-          using: SHA256.self,
+          using: SHA512.self,
           salt: symmetricKeySalt,
           sharedInfo: Data(),
           outputByteCount: 32

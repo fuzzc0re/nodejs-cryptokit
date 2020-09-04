@@ -107,7 +107,7 @@ struct ContentView: View {
       }
       
       let nodejsP256SignedMessage = "Example message signed with P256 by nodejs";
-      let nodejsP256SignatureBase64 = "MEUCIHsV3VAdR++2iUnZHRE8puYmTxWA20xyOTn4Ys75Auv9AiEApfcivwc24ZQ8sbH/a4tq/LrSAmxjp9orifL7IDC3HEc=";
+      let nodejsP256SignatureBase64 = "MEUCIQDPD2rylaFTPWAsHPuDNVldwcjhj9Gum+wGwJ1uVM0zmgIgIMo8M08f53JvuMAH7on84OnFoZidDpDIESU7n9eJ/qI=";
       do {
         let verifyNodejsP256Signature = try Crypto.NIST_P256.verifyMessageSignatureFromNodejs(
           message: nodejsP256SignedMessage,
@@ -118,8 +118,8 @@ struct ContentView: View {
         print(error)
       }
       
-      let nodejsP256EncryptedMessage = "G9D3LEfI10A5N85roteUVFl4MIfeTDBy8DDRns4V7CeOXB7YgJT90u05NivtgD8DiXQuW0dXE0q9ApRro7wG97A/bvYwfA4dLw==";
-      let nodejsP256EncryptedMessageSalt = "R1VND5dL7HQJ/BJf1fBFVg==";
+      let nodejsP256EncryptedMessage = "YXpdQyFHmDcE2z3xoTR3LelKAAl/29OunuhtMKqKZSrk6Svaf0oal/FyTPXzrbSzbVj1Kv7rgds9gA6U6VxtBSG8g7g0nDNaOG7NVhUve85XmzAstB5FqYOqOCM9gVtbKRsC9285A01/CjzeDNLyEw==";
+      let nodejsP256EncryptedMessageSalt = "CErxuyKnH12B3PRw2pCOO5d4RuCy9lBQ5zNJ7DQe/dZcfG0Q01igjAUt1v/XlyGtAsXAv6UTyfnfyom/ph98SA==";
       do {
         let decryptedNodejsMessage = try Crypto.NIST_P256.decryptMessageWithSymmetricKeyFromNodejs(
           encryptedMessage: nodejsP256EncryptedMessage,
@@ -132,15 +132,15 @@ struct ContentView: View {
       }
       
       let nodejsEd25519SignedMessage = "Example message signed with Ed25519 by nodejs";
-      let nodejsEd25519SignatureBase64 = "sVe9XulTRgEabXRLnCXpVzHg8BkLtKuJTUX3EDMxjs0Ntkk80In0QXKsc00Uir2D2EnY3KAXCQYT5fJHWvdGAQ==";
+      let nodejsEd25519SignatureBase64 = "1XsQpNGW7KFqlzZfRWNJgP5Z0tB+Gy4YcNlg40rhX4yfYiczW89p96g0QmlNlR6bdWCvD+0GVoE332WS6bl+Bw==";
       let verifyNodejsEd25519Signature = Crypto.Ed25519.verifyMessageSignatureFromNodejs(
         message: nodejsEd25519SignedMessage,
         nodejsSignatureBase64: nodejsEd25519SignatureBase64
       )
       print("\nEd25519 verification from nodejs is: \(verifyNodejsEd25519Signature)")
       
-      let nodejsX25519EncryptedMessage = "w6tXyJYVxbCDdGizrFvclFD7GavL5D5RNOaeSuq8WdWh7f/BaHMoEFwDPER4/eCfwoTi7rD5Y1NjBRgj/ffEeBRe6mLwV2iM3vLS";
-      let nodejsX25519EncryptedMessageSalt = "4aeAaaL5pc8CPgbywoFxzA==";
+      let nodejsX25519EncryptedMessage = "/SLFTdIp27q2dbX2MAnJWG2dzHXSkbaUFDQtDNY3/m9EkTZnA++bMymO9/hDNtM6k6xgneFAWbLB78uPjB5HXd61a1Bk4xX6LEtQ4Ok6z34GkCWJXftKbJGIaJ9hjn4Nhcgv7gfZdOQnF9B1CQO7Sw==";
+      let nodejsX25519EncryptedMessageSalt = "O/Xqrmu+SdgVkNy0UHZrLK/QM74aKDs89BJYzdipXb2g6667/6v9Vt/lo5SPxoRZm9h6YfrZUarYfV2XL1odzw==";
       do {
         let decryptedNodejsMessage = try Crypto.X25519.decryptMessageWithSymmetricKeyFromNodejs(
           encryptedMessage: nodejsX25519EncryptedMessage,
