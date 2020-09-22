@@ -4,6 +4,7 @@ import { convertToPEM } from "./funcs/convertToPEM";
 
 const algorithm = "aes-256-ctr";
 
+const P256OIDHeaderLength = 26;
 const P256OIDHeader = new Uint8Array([
   0x30,
   0x59,
@@ -32,7 +33,6 @@ const P256OIDHeader = new Uint8Array([
   0x42,
   0x00,
 ]);
-const P256OIDHeaderLength = 26;
 const P256ASNBuffer = Buffer.from(P256OIDHeader, P256OIDHeaderLength);
 
 export async function generateP256Keys(password?: string): Promise<{ publicKey: string; privateKey: string }> {
@@ -89,14 +89,19 @@ export function loadP256PublicKey(content: string): Promise<KeyObject> {
       let publicKey = content;
       if (!isPEM) {
         const publicKeyBuffer = Buffer.from(content, "base64");
+        console.log(publicKeyBuffer);
         if (publicKeyBuffer.length === 91) {
           publicKey = convertToPEM(content);
         } else if (publicKeyBuffer.length === 65) {
           const publicKeyWithHeader = Buffer.concat([P256ASNBuffer, publicKeyBuffer]);
           const publicKeyWithHeaderBase64 = publicKeyWithHeader.toString("base64");
           publicKey = convertToPEM(publicKeyWithHeaderBase64);
+        } else if (publicKeyBuffer.length === 64) {
+          const publicKeyWithHeader = Buffer.concat([P256ASNBuffer, new Uint8Array([0x04]), publicKeyBuffer]);
+          const publicKeyWithHeaderBase64 = publicKeyWithHeader.toString("base64");
+          publicKey = convertToPEM(publicKeyWithHeaderBase64);
         } else {
-          reject(new Error("Invalid Ed25519 key length"));
+          reject(new Error("Invalid P256 public key length"));
         }
       }
 

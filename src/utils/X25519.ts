@@ -107,7 +107,7 @@ export function loadX25519PublicKey(content: string): Promise<KeyObject> {
           const publicKeyWithHeaderBase64 = publicKeyWithHeader.toString("base64");
           publicKey = convertToPEM(publicKeyWithHeaderBase64);
         } else {
-          reject(new Error("Invalid Ed25519 key length"));
+          reject(new Error("Invalid X25519 public key length"));
         }
       }
 
