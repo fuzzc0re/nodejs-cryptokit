@@ -1,15 +1,12 @@
 {
   "name": "cryptokit",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Communicate between nodejs crypto and Swift Cryptokit",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/fuzzcard/nodejs-cryptokit.git"
-  },
+  "repository": "git://github.com/fuzzcard/nodejs-cryptokit.git",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com/@fuzzcard"
   },
   "homepage": "https://github.com/fuzzcard/nodejs-cryptokit#readme",
   "scripts": {
