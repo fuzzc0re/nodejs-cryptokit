@@ -89,7 +89,6 @@ export function loadP256PublicKey(content: string): Promise<KeyObject> {
       let publicKey = content;
       if (!isPEM) {
         const publicKeyBuffer = Buffer.from(content, "base64");
-        console.log(publicKeyBuffer);
         if (publicKeyBuffer.length === 91) {
           publicKey = convertToPEM(content);
         } else if (publicKeyBuffer.length === 65) {
