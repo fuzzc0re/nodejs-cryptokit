@@ -73,7 +73,7 @@ export async function generateP256Keys(password?: string): Promise<{ publicKey: 
           const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
 
           const iv = randomBytes(ivLength);
-          const cipher = createCipheriv(algorithm, key, iv, { authTagLength: authTagLength });
+          const cipher = createCipheriv(algorithm, key, iv, { authTagLength });
           const privateKeyBufferFinal = Buffer.concat([cipher.update(privateKey, "utf8"), cipher.final()]);
           const authTag = cipher.getAuthTag();
           const privateKeyEncrypted = Buffer.concat([salt, iv, privateKeyBufferFinal, authTag]);
@@ -91,7 +91,7 @@ export async function generateP256Keys(password?: string): Promise<{ publicKey: 
 export function loadP256PrivateKey(content: string, password?: string): Promise<KeyObject> {
   return new Promise((resolve, reject) => {
     try {
-      let contentBuffer = Buffer.from(content, "base64");
+      const contentBuffer = Buffer.from(content, "base64");
       const contentBufferLength = contentBuffer.length;
       const salt = contentBuffer.slice(0, saltLength);
       const iv = contentBuffer.slice(saltLength, saltLength + ivLength);
@@ -101,7 +101,7 @@ export function loadP256PrivateKey(content: string, password?: string): Promise<
       const keyBuffer = Buffer.from(password ? password : (process.env.P256_PASS as string), "utf8");
       const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
 
-      const decipher = createDecipheriv(algorithm, key, iv, { authTagLength: authTagLength });
+      const decipher = createDecipheriv(algorithm, key, iv, { authTagLength });
       decipher.setAuthTag(authTag);
       const privateKeyDecrypted = Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
       const privateKeyObject = createPrivateKey({ key: privateKeyDecrypted });
