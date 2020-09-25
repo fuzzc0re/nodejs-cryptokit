@@ -1,8 +1,4 @@
 import { join } from "path";
-import {
-  readFileSync,
-  // writeFileSync
-} from "fs";
 import { config } from "dotenv";
 
 import cryptokit from "../index";
@@ -11,53 +7,19 @@ import { iOSP256PublicKey, iOSX25519PublicKey } from "./keys/iOS.test";
 
 config({ path: join(__dirname, ".env") });
 
-const P256FolderPath = join(__dirname, "keys", "P256");
-const P256Filepaths = {
-  privateKeyPath: join(P256FolderPath, "private.key"),
-  publicKeyPath: join(P256FolderPath, "public.key"),
-};
+const P256PrivateKeyContent = process.env.P256_PRIVATE_KEY as string;
+const P256PublicKeyContent = process.env.P256_PUBLIC_KEY as string;
 
-const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
-const Ed25519Filepaths = {
-  privateKeyPath: join(Ed25519FolderPath, "private.key"),
-  publicKeyPath: join(Ed25519FolderPath, "public.key"),
-};
+const Ed25519PrivateKeyContent = process.env.ED25519_PRIVATE_KEY as string;
+const Ed25519PublicKeyContent = process.env.ED25519_PUBLIC_KEY as string;
 
-const X25519FolderPath = join(__dirname, "keys", "X25519");
-const X25519Filepaths = {
-  privateKeyPath: join(X25519FolderPath, "private.key"),
-  publicKeyPath: join(X25519FolderPath, "public.key"),
-};
-
-// async function generate() {
-//   const P256Keys = await cryptokit.P256.generateKeys();
-//   const Ed25519Keys = await cryptokit.Ed25519.generateKeys();
-//   const X25519Keys = await cryptokit.X25519.generateKeys();
-
-//   writeFileSync(P256Filepaths.privateKeyPath, P256Keys.privateKey);
-//   writeFileSync(P256Filepaths.publicKeyPath, P256Keys.publicKey);
-
-//   writeFileSync(Ed25519Filepaths.privateKeyPath, Ed25519Keys.privateKey);
-//   writeFileSync(Ed25519Filepaths.publicKeyPath, Ed25519Keys.publicKey);
-
-//   writeFileSync(X25519Filepaths.privateKeyPath, X25519Keys.privateKey);
-//   writeFileSync(X25519Filepaths.publicKeyPath, X25519Keys.publicKey);
-// }
-// generate();
-
-const P256PrivateKeyContent = readFileSync(P256Filepaths.privateKeyPath, "utf8");
-const P256PublicKeyContet = readFileSync(P256Filepaths.publicKeyPath, "utf8");
-
-const Ed25519PrivateKeyContent = readFileSync(Ed25519Filepaths.privateKeyPath, "utf8");
-const Ed25519PublicKeyContent = readFileSync(Ed25519Filepaths.publicKeyPath, "utf8");
-
-const X25519PrivateKeyContent = readFileSync(X25519Filepaths.privateKeyPath, "utf8");
-const X25519PublicKeyContent = readFileSync(X25519Filepaths.publicKeyPath, "utf8");
+const X25519PrivateKeyContent = process.env.X25519_PRIVATE_KEY as string;
+const X25519PublicKeyContent = process.env.X25519_PUBLIC_KEY as string;
 
 describe("Nodejs crypto test suite", () => {
   test("Sign with P256PrivateKey and verify with P256PublicKey", async () => {
     const P256PrivateKey = await cryptokit.P256.loadPrivateKey(P256PrivateKeyContent);
-    const P256PublicKey = await cryptokit.P256.loadPublicKey(P256PublicKeyContet);
+    const P256PublicKey = await cryptokit.P256.loadPublicKey(P256PublicKeyContent);
 
     const rawP256PublicKey = await cryptokit.P256.formatPublicKeyToRaw(P256PublicKey);
     console.log("Raw P256 public key to copy to iOS = " + rawP256PublicKey);

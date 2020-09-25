@@ -1,5 +1,5 @@
 const { join } = require("path");
-const { readFileSync } = require("fs");
+// const { readFileSync } = require("fs");
 const { config } = require("dotenv");
 
 config({ path: join(__dirname, ".env") });
@@ -8,21 +8,21 @@ const cryptokit = require("../lib/index");
 
 const { iOSP256PublicKeyRaw, iOSEd25519PublicKeyRaw } = require("./keys/iOS");
 
-const P256FolderPath = join(__dirname, "keys", "P256");
-const P256Filepaths = {
-  privateKeyPath: join(P256FolderPath, "private.key"),
-  publicKeyPath: join(P256FolderPath, "public.key"),
-};
-const P256PrivateKeyContent = readFileSync(P256Filepaths.privateKeyPath, "utf8");
-const P256PublicKeyContent = readFileSync(P256Filepaths.publicKeyPath, "utf8");
+// const P256FolderPath = join(__dirname, "keys", "P256");
+// const P256Filepaths = {
+//   privateKeyPath: join(P256FolderPath, "private.key"),
+//   publicKeyPath: join(P256FolderPath, "public.key"),
+// };
+// const P256PrivateKeyContent = readFileSync(P256Filepaths.privateKeyPath, "utf8");
+// const P256PublicKeyContent = readFileSync(P256Filepaths.publicKeyPath, "utf8");
 
-const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
-const Ed25519Filepaths = {
-  privateKeyPath: join(Ed25519FolderPath, "private.key"),
-  publicKeyPath: join(Ed25519FolderPath, "public.key"),
-};
-const Ed25519PrivateKeyContent = readFileSync(Ed25519Filepaths.privateKeyPath, "utf8");
-const Ed25519PublicKeyContent = readFileSync(Ed25519Filepaths.publicKeyPath, "utf8");
+// const Ed25519FolderPath = join(__dirname, "keys", "Ed25519");
+// const Ed25519Filepaths = {
+//   privateKeyPath: join(Ed25519FolderPath, "private.key"),
+//   publicKeyPath: join(Ed25519FolderPath, "public.key"),
+// };
+// const Ed25519PrivateKeyContent = readFileSync(Ed25519Filepaths.privateKeyPath, "utf8");
+// const Ed25519PublicKeyContent = readFileSync(Ed25519Filepaths.publicKeyPath, "utf8");
 
 const messageToSignWithP256 = "Example message signed with P256 by nodejs";
 
@@ -38,11 +38,11 @@ const iOSEd25519MessageSignature =
 
 async function exampleSignatures() {
   try {
-    const P256PrivateKey = await cryptokit.P256.loadPrivateKey(P256PrivateKeyContent);
-    const P256PublicKey = await cryptokit.P256.loadPublicKey(P256PublicKeyContent);
+    const P256PrivateKey = await cryptokit.P256.loadPrivateKey(process.env.P256_PRIVATE_KEY);
+    const P256PublicKey = await cryptokit.P256.loadPublicKey(process.env.P256_PUBLIC_KEY);
 
-    const Ed25519PrivateKey = await cryptokit.Ed25519.loadPrivateKey(Ed25519PrivateKeyContent);
-    const Ed25519PublicKey = await cryptokit.Ed25519.loadPublicKey(Ed25519PublicKeyContent);
+    const Ed25519PrivateKey = await cryptokit.Ed25519.loadPrivateKey(process.env.ED25519_PRIVATE_KEY);
+    const Ed25519PublicKey = await cryptokit.Ed25519.loadPublicKey(process.env.ED25519_PUBLIC_KEY);
 
     const iOSCompatibleP256PublicKey = await cryptokit.P256.formatPublicKeyToRaw(P256PublicKey);
     console.log("P256 iOS compatible public key = " + iOSCompatibleP256PublicKey + "\n");

@@ -1,8 +1,4 @@
 import { join } from "path";
-import {
-  readFileSync,
-  // writeFileSync
-} from "fs";
 import { config } from "dotenv";
 
 import cryptokit from "../index";
@@ -11,36 +7,8 @@ import { iOSP256PublicKey, iOSEd25519PublicKey, iOSX25519PublicKey } from "./key
 
 config({ path: join(__dirname, ".env") });
 
-const P256FolderPath = join(__dirname, "keys", "P256");
-const P256Filepaths = {
-  privateKeyPath: join(P256FolderPath, "private.key"),
-  publicKeyPath: join(P256FolderPath, "public.key"),
-};
-
-const X25519FolderPath = join(__dirname, "keys", "X25519");
-const X25519Filepaths = {
-  privateKeyPath: join(X25519FolderPath, "private.key"),
-  publicKeyPath: join(X25519FolderPath, "public.key"),
-};
-
-// async function generate() {
-//   const P256Keys = await cryptokit.P256.generateKeys();
-//   const Ed25519Keys = await cryptokit.Ed25519.generateKeys();
-//   const X25519Keys = await cryptokit.X25519.generateKeys();
-
-//   writeFileSync(P256Filepaths.privateKeyPath, P256Keys.privateKey);
-//   writeFileSync(P256Filepaths.publicKeyPath, P256Keys.publicKey);
-
-//   writeFileSync(Ed25519Filepaths.privateKeyPath, Ed25519Keys.privateKey);
-//   writeFileSync(Ed25519Filepaths.publicKeyPath, Ed25519Keys.publicKey);
-
-//   writeFileSync(X25519Filepaths.privateKeyPath, X25519Keys.privateKey);
-//   writeFileSync(X25519Filepaths.publicKeyPath, X25519Keys.publicKey);
-// }
-// generate();
-
-const P256PrivateKeyContent = readFileSync(P256Filepaths.privateKeyPath, "utf8");
-const X25519PrivateKeyContent = readFileSync(X25519Filepaths.privateKeyPath, "utf8");
+const P256PrivateKeyContent = process.env.P256_PRIVATE_KEY as string;
+const X25519PrivateKeyContent = process.env.X25519_PRIVATE_KEY as string;
 
 describe("Swift Cryptokit test suite", () => {
   test("Verify iOS P256 signature", async () => {
@@ -69,9 +37,9 @@ describe("Swift Cryptokit test suite", () => {
 
     const iOSP256Message = "Hello! I am an encrypted iOS message with symmetric P256 key <3";
     const iOSP256EncryptedMessage =
-      "jEn5nutFeXcFyNf522GAqYY52ueRRe2jdjQKK21AizC8gH1gYbdwD2R1+q3F4JfdcPohehStuGfj16zaIHna3lIgPAhsAkvQ34rqnuSe4xWaDcHCbWTC2jyEUQ==";
+      "ro4XWUC43Dwpinhy9K5mgD8tSNt73XMWlh4U7NDbzV0AxdUr8akmUis7cDCrxEFeJaD3YGq93GsBBQy7APT9QsZK72yw7mz+1/FZUkRmbsGy6KsbdkOVd0iX6g==";
     const iOSP256SymmetricKeySalt =
-      "VEC0tdnHcOSiPr6ebmYCX6w7m8SmLhqa25+PntP86eHLD1rlBqS97aHI5EjDKGwn6Uq6wyQIn5CZxM/j9wmD3g==";
+      "p3SxObu+ABqFOzf2k3hEoG9K192Qm0YSozUxPp3NY/WPq8qN8Y7nvEdL8dgH7KQ7Q1zqASVkJypD4wyb2p4eVw==";
     expect(
       await cryptokit.P256.decrypt(
         iOSP256EncryptedMessage,

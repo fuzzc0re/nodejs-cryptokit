@@ -2,4 +2,10 @@ node_modules
 lib
 coverage
 .DS_Store
-src/__tests__/keys/ephemeral
+src/__tests__/keys/P256
+src/__tests__/keys/Ed25519
+src/__tests__/keys_X25519
+src/__tests__/keys/ephemeral/*
+src/examples/keys/P256
+src/examples/keys/Ed25519
+src/examples/keys_X25519

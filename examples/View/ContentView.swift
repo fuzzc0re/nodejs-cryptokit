@@ -106,8 +106,8 @@ struct ContentView: View {
         return
       }
       
-      let nodejsP256SignedMessage = "Example message signed with P256 by nodejs";
-      let nodejsP256SignatureBase64 = "MEUCIQDPD2rylaFTPWAsHPuDNVldwcjhj9Gum+wGwJ1uVM0zmgIgIMo8M08f53JvuMAH7on84OnFoZidDpDIESU7n9eJ/qI=";
+      let nodejsP256SignedMessage = "Example message signed with P256 by nodejs"
+      let nodejsP256SignatureBase64 = "MEYCIQCygjOwjV08/D/ajOK3k7PXHWIw79FrKuH4upcOW1734gIhAObF4/URg8nKdQAAcuLO7escu321N3Hxk1BlXmSDERCq"
       do {
         let verifyNodejsP256Signature = try Crypto.NIST_P256.verifyMessageSignatureFromNodejs(
           message: nodejsP256SignedMessage,
@@ -118,8 +118,8 @@ struct ContentView: View {
         print(error)
       }
       
-      let nodejsP256EncryptedMessage = "YXpdQyFHmDcE2z3xoTR3LelKAAl/29OunuhtMKqKZSrk6Svaf0oal/FyTPXzrbSzbVj1Kv7rgds9gA6U6VxtBSG8g7g0nDNaOG7NVhUve85XmzAstB5FqYOqOCM9gVtbKRsC9285A01/CjzeDNLyEw==";
-      let nodejsP256EncryptedMessageSalt = "CErxuyKnH12B3PRw2pCOO5d4RuCy9lBQ5zNJ7DQe/dZcfG0Q01igjAUt1v/XlyGtAsXAv6UTyfnfyom/ph98SA==";
+      let nodejsP256EncryptedMessage = "6DtpOP9VbS71rBSkr0aI1Xue4nUTwcdVssry1/g3/6sgd+Lei6u5tlyBhZ3R/k+2sv2RbS3PZ5GC/ioQzJL5ArIekoFEg6TTWjO0zWETe6r9w/sqZ5odDFHZBQNrvmOhb+z94t6hdwXvjFG+vAUxbw=="
+      let nodejsP256EncryptedMessageSalt = "fJEzYpw0Njx2iwxz1pTeq7QxA0qBcpkP+zzDI5GO5/2rPuoF6CoJMd7Q5fLsCCxmjFrOy4I2Id4dVJ/HRr2LFw=="
       do {
         let decryptedNodejsMessage = try Crypto.NIST_P256.decryptMessageWithSymmetricKeyFromNodejs(
           encryptedMessage: nodejsP256EncryptedMessage,

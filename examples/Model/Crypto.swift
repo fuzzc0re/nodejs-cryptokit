@@ -23,7 +23,7 @@ fileprivate func generateRandomBytes(length: Int) throws -> Data? {
 }
 
 // String between PEM headers
-let nodejsP256PublicKeyBase64 = "myeIjJ2QtbnA9xs5CEjTUEEpZ9yYuzTLSQnwZknCJVnzunlddQBcTpIynGLqaFM+ar+Gpyc45t7jjRcHzzGdMQ=="
+let nodejsP256PublicKeyBase64 = "72YTHMZSzHuFaEOwZJRl5i8zjeUayOgCx57fA2FurRYsFTFSHp7CnU/veopw3DLQ38bHfFieEd63fo555s52Wg=="
 let nodejsEd25519PublicKeyBase64 = "bDdCKL1MtrVuLKyf0YCsKYFlhMlgtJRFACu2CShKVoY="
 let nodejsX25519PublicKeyBase64 = "KbH8dSp1frTmLPp+LGPpM5fLnncR7J3xSQDSJKPZg0o="
 

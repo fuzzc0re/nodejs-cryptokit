@@ -18,6 +18,11 @@ const publicKeyPath = join(folderpath, "public.key");
 describe("P256 keys", () => {
   test("P256 key generation", async () => {
     const { publicKey, privateKey } = await cryptokit.P256.generateKeys();
+
+    const P256PublicKey = await cryptokit.P256.loadPublicKey(publicKey);
+    const rawP256PublicKey = await cryptokit.P256.formatPublicKeyToRaw(P256PublicKey);
+    console.log("Raw P256 public key to copy to iOS = " + rawP256PublicKey);
+
     writeFileSync(publicKeyPath, publicKey);
     writeFileSync(privateKeyPath, privateKey);
     expect(privateKey).toEqual(expect.any(String));
