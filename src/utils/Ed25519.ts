@@ -45,9 +45,8 @@ export function generateEd25519Keys(password?: string): Promise<{ publicKey: str
           const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
 
           const iv = randomBytes(ivLength);
-          const cipher = createCipheriv(algorithm, key, iv);
-          const privateKeyCipherBuffer = cipher.update(privateKey);
-          const privateKeyBufferFinal = Buffer.concat([privateKeyCipherBuffer, cipher.final()]);
+          const cipher = createCipheriv(algorithm, key, iv, { authTagLength: authTagLength });
+          const privateKeyBufferFinal = Buffer.concat([cipher.update(privateKey, "utf8"), cipher.final()]);
           const authTag = cipher.getAuthTag();
           const privateKeyEncrypted = Buffer.concat([salt, iv, privateKeyBufferFinal, authTag]);
           const privateKeyEncryptedBase64 = privateKeyEncrypted.toString("base64");
@@ -61,15 +60,10 @@ export function generateEd25519Keys(password?: string): Promise<{ publicKey: str
   });
 }
 
-export function loadEd25519PrivateKey(content: string | Buffer, password?: string): Promise<KeyObject> {
+export function loadEd25519PrivateKey(content: string, password?: string): Promise<KeyObject> {
   return new Promise((resolve, reject) => {
     try {
-      let contentBuffer: Buffer;
-      if (Buffer.isBuffer(content)) {
-        contentBuffer = content;
-      } else {
-        contentBuffer = Buffer.from(content, "base64");
-      }
+      let contentBuffer = Buffer.from(content, "base64");
       const contentBufferLength = contentBuffer.length;
       const salt = contentBuffer.slice(0, saltLength);
       const iv = contentBuffer.slice(saltLength, saltLength + ivLength);
@@ -79,11 +73,10 @@ export function loadEd25519PrivateKey(content: string | Buffer, password?: strin
       const keyBuffer = Buffer.from(password ? password : (process.env.ED25519_PASS as string), "utf8");
       const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
 
-      const decipher = createDecipheriv(algorithm, key, iv);
+      const decipher = createDecipheriv(algorithm, key, iv, { authTagLength: authTagLength });
       decipher.setAuthTag(authTag);
-      const decrypted = decipher.update(encryptedContent);
-      const privateKey = Buffer.concat([decrypted, decipher.final()]);
-      const privateKeyObject = createPrivateKey({ key: privateKey });
+      const privateKeyDecrypted = Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
+      const privateKeyObject = createPrivateKey({ key: privateKeyDecrypted });
 
       resolve(privateKeyObject);
     } catch (error) {

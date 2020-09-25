@@ -1,8 +1,22 @@
-import { generateKeyPair, createPublicKey, createPrivateKey, KeyObject } from "crypto";
+import {
+  generateKeyPair,
+  randomBytes,
+  createCipheriv,
+  createDecipheriv,
+  createPublicKey,
+  createPrivateKey,
+  KeyObject,
+} from "crypto";
 
+import { hkdf } from "./funcs/hkdf";
 import { convertToPEM } from "./funcs/convertToPEM";
 
-const algorithm = "aes-256-ctr";
+const algorithm = "aes-256-gcm";
+const hash = "sha512";
+const saltLength = 64;
+const symmetricKeyLength = 32;
+const ivLength = 16;
+const authTagLength = 16;
 
 const P256OIDHeaderLength = 26;
 const P256OIDHeader = new Uint8Array([
@@ -47,16 +61,25 @@ export async function generateP256Keys(password?: string): Promise<{ publicKey: 
             format: "pem",
           },
           privateKeyEncoding: {
-            type: "sec1",
+            type: "pkcs8",
             format: "pem",
-            cipher: algorithm,
-            passphrase: password ? password : process.env.P256_PASS,
           },
         },
         (err, publicKey, privateKey) => {
           if (err) reject(err);
 
-          resolve({ publicKey, privateKey });
+          const salt = randomBytes(saltLength);
+          const keyBuffer = Buffer.from(password ? password : (process.env.P256_PASS as string), "utf8");
+          const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
+
+          const iv = randomBytes(ivLength);
+          const cipher = createCipheriv(algorithm, key, iv, { authTagLength: authTagLength });
+          const privateKeyBufferFinal = Buffer.concat([cipher.update(privateKey, "utf8"), cipher.final()]);
+          const authTag = cipher.getAuthTag();
+          const privateKeyEncrypted = Buffer.concat([salt, iv, privateKeyBufferFinal, authTag]);
+          const privateKeyEncryptedBase64 = privateKeyEncrypted.toString("base64");
+
+          resolve({ publicKey, privateKey: privateKeyEncryptedBase64 });
         }
       );
     } catch (error) {
@@ -68,12 +91,20 @@ export async function generateP256Keys(password?: string): Promise<{ publicKey: 
 export function loadP256PrivateKey(content: string, password?: string): Promise<KeyObject> {
   return new Promise((resolve, reject) => {
     try {
-      const privateKeyObject = createPrivateKey({
-        key: content,
-        type: "sec1",
-        format: "pem",
-        passphrase: password ? password : process.env.P256_PASS,
-      });
+      let contentBuffer = Buffer.from(content, "base64");
+      const contentBufferLength = contentBuffer.length;
+      const salt = contentBuffer.slice(0, saltLength);
+      const iv = contentBuffer.slice(saltLength, saltLength + ivLength);
+      const encryptedContent = contentBuffer.slice(saltLength + ivLength, contentBufferLength - authTagLength);
+      const authTag = contentBuffer.slice(contentBufferLength - authTagLength, contentBufferLength);
+
+      const keyBuffer = Buffer.from(password ? password : (process.env.P256_PASS as string), "utf8");
+      const key = hkdf(keyBuffer, symmetricKeyLength, salt, "", hash);
+
+      const decipher = createDecipheriv(algorithm, key, iv, { authTagLength: authTagLength });
+      decipher.setAuthTag(authTag);
+      const privateKeyDecrypted = Buffer.concat([decipher.update(encryptedContent), decipher.final()]);
+      const privateKeyObject = createPrivateKey({ key: privateKeyDecrypted });
 
       resolve(privateKeyObject);
     } catch (error) {

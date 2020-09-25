@@ -38,12 +38,7 @@ async function app() {
 app();
 ```
 
-The P256 private key is encrypted with AES-256-CTR and the output is in 'sec1' format.
-The P256 public key is in 'spki' format.
-
-There are also equivalent functions for Ed25519 and X25519 keys. Their private key output is encrypted
-with AES-256-GCM. It is a base64-encoded string representing an array buffer comprised of a keySalt,
-an iv, the encrypted content buffer and the authTag.
+The private keys are encrypted with AES-256-GCM by default. The output is a base64-encoded string representing an array buffer comprised of a keySalt (length: 64), an iv (length: 16), the encrypted content buffer and the authTag (length: 16).
 
 ## Loading keys
 
@@ -64,9 +59,8 @@ async function app() {
 app();
 ```
 
-The P256.loadPrivateKey() function expects the encrypted key in 'sec1' format. The equivalent
-Ed25519.loadPrivateKey() and X25519.loadPrivateKey() methods expect the base64-encoded string described above,
-they decrypt it and they output the KeyObject.
+The loadPrivateKey() methods expect the base64-encoded string described before.
+They will decrypt it and they will output the KeyObject.
 
 Swift Cryptokit expects the public keys to be in raw format (without identifying headers).
 In order to convert the nodejs KeyObject to raw public key base64 representation you do
@@ -155,9 +149,9 @@ async function app() {
 app();
 ```
 
-The result of the encryption function is a dictionary with the encrypted message buffer in base64 string format and the salt used for the symmetric key generation in base64 string format. You need to send the encrypted message as well as the salt to the device that will decrypt it.
+- The result of the encryption function is a dictionary with the encrypted message buffer in base64 string format and the salt used for the symmetric key generation in base64 string format. You need to send the encrypted message as well as the salt (length: 64) to the device that will decrypt it.
 
-The encrypted message is a buffer with an iv of length 12, an authentication tag of length 16 and a chachapoly cipher.
+The encrypted message is a buffer with an iv (length: 12), an authentication tag (length: 16) and a chachapoly cipher.
 
 ## Examples
 
@@ -165,4 +159,4 @@ You can see a full example, as well as a SwiftUI view to test the implementation
 
 ## Licence
 
-Copyright (c) 2020 Fuzznets P.C. All rights reserved.
+Copyright (c) 2020 Fuzznets P.C. All rights reserved. The The software is distributed under the terms described in the [LICENCE](LICENSE) file.
